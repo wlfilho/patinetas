@@ -1,103 +1,160 @@
-import Image from "next/image";
+import Link from 'next/link'
+import SearchBar from '@/components/ui/SearchBar'
+import CategoryCard from '@/components/ui/CategoryCard'
+
+import { generateSlug } from '@/lib/utils'
+
+// Mock data for featured categories (in a real app, this would come from the database)
+const featuredCategories = [
+  {
+    name: 'Venta de Patinetas Eléctricas',
+    description: 'Encuentra las mejores tiendas para comprar tu patineta eléctrica nueva',
+    count: 45,
+    slug: generateSlug('Venta de Patinetas Eléctricas'),
+    featured: true
+  },
+  {
+    name: 'Reparación y Mantenimiento',
+    description: 'Servicios técnicos especializados para mantener tu patineta en perfecto estado',
+    count: 32,
+    slug: generateSlug('Reparación y Mantenimiento'),
+    featured: true
+  },
+  {
+    name: 'Repuestos y Accesorios',
+    description: 'Todo lo que necesitas para personalizar y reparar tu patineta eléctrica',
+    count: 28,
+    slug: generateSlug('Repuestos y Accesorios'),
+    featured: true
+  },
+  {
+    name: 'Alquiler de Patinetas',
+    description: 'Alquila patinetas eléctricas por horas, días o semanas',
+    count: 15,
+    slug: generateSlug('Alquiler de Patinetas'),
+    featured: false
+  }
+]
+
+const stats = [
+  { name: 'Negocios Registrados', value: '150+' },
+  { name: 'Ciudades Cubiertas', value: '25+' },
+  { name: 'Categorías Disponibles', value: '10+' },
+  { name: 'Usuarios Activos', value: '5K+' },
+]
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="bg-white">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary/5 via-white to-secondary/5 py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              Encuentra las Mejores{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                Patinetas Eléctricas
+              </span>{' '}
+              en Colombia
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+              El directorio más completo de patinetas eléctricas en Colombia.
+              Descubre tiendas, servicios técnicos, repuestos y todo lo que necesitas
+              para tu movilidad eléctrica sostenible.
+            </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {/* Search Bar */}
+            <div className="mt-10 max-w-2xl mx-auto">
+              <SearchBar
+                size="lg"
+                showFilters={true}
+                placeholder="Buscar tiendas, servicios, repuestos..."
+              />
+            </div>
+
+            {/* Quick Stats */}
+            <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-8">
+              {stats.map((stat) => (
+                <div key={stat.name} className="text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {stat.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Featured Categories */}
+      <section className="py-16 sm:py-24 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Categorías Principales
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Explora las diferentes categorías de negocios especializados en patinetas eléctricas
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {featuredCategories.map((category) => (
+              <CategoryCard
+                key={category.slug}
+                name={category.name}
+                description={category.description}
+                count={category.count}
+                slug={category.slug}
+                featured={category.featured}
+              />
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/categorias"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors"
+            >
+              Ver Todas las Categorías
+              <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-primary">
+        <div className="mx-auto max-w-7xl py-16 px-6 sm:py-24 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              ¿Tienes un Negocio de Patinetas Eléctricas?
+            </h2>
+            <p className="mt-4 text-lg text-primary-light">
+              Únete a nuestro directorio y llega a miles de clientes potenciales en toda Colombia
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/agregar-negocio"
+                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-primary bg-white hover:bg-gray-50 transition-colors"
+              >
+                Agregar Mi Negocio
+              </Link>
+              <Link
+                href="/contacto"
+                className="inline-flex items-center justify-center px-6 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white hover:text-primary transition-colors"
+              >
+                Contactar Soporte
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-  );
+  )
 }
