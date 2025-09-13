@@ -22,6 +22,9 @@ export default function BrandsDirectoryPage() {
   // Force route precedence - this should be the brands page, not dynamic [id]
   console.log('BrandsDirectoryPage loaded - this is /catalogo/marcas')
 
+  // Debug: Log to confirm this is the correct component
+  console.log('Route params should be empty for static route:', window?.location?.pathname)
+
   useEffect(() => {
     loadBrands()
   }, [])
@@ -116,7 +119,7 @@ export default function BrandsDirectoryPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                Marcas de Patinetas Eléctricas
+                Marcas de Patinetas Eléctricas en Colombia
               </h1>
               <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
                 Descubre todas las marcas disponibles en Colombia. Encuentra la patineta eléctrica perfecta 
