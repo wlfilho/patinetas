@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { brandService, modelService } from '@/lib/supabase'
-import { getBrandSlug, isValidSlug } from '@/lib/slugs'
+import { isValidSlug } from '@/lib/slugs'
 import BrandCatalogClient from './BrandCatalogClient'
 
 interface BrandCatalogPageProps {
@@ -115,17 +115,12 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
   )
 }
 
+// Force dynamic rendering to avoid build-time issues with Supabase connection
+export const dynamic = 'force-dynamic'
+
 // Generate static params for popular brands (optional, for better performance)
 export async function generateStaticParams() {
-  try {
-    const brands = await brandService.getAll()
-    
-    // Generate params for all active brands
-    return brands.map((brand) => ({
-      slug: getBrandSlug(brand.nombre),
-    }))
-  } catch (error) {
-    console.error('Error generating static params:', error)
-    return []
-  }
+  // Return empty array to force dynamic rendering for all routes
+  // This prevents build-time failures when Supabase isn't accessible
+  return []
 }
