@@ -7,16 +7,18 @@ interface CategoryCardProps {
   count: number
   slug: string
   featured?: boolean
+  icon?: string
 }
 
-export default function CategoryCard({ 
-  name, 
-  description, 
-  count, 
-  slug, 
-  featured = false 
+export default function CategoryCard({
+  name,
+  description,
+  count,
+  slug,
+  featured = false,
+  icon
 }: CategoryCardProps) {
-  const icon = getCategoryIcon(name)
+  const displayIcon = icon || getCategoryIcon(name)
 
   return (
     <Link 
@@ -36,9 +38,9 @@ export default function CategoryCard({
           }
         `}>
           {featured ? (
-            <span className="text-white">{icon}</span>
+            <span className="text-white">{displayIcon}</span>
           ) : (
-            <span className="group-hover:scale-110 transition-transform">{icon}</span>
+            <span className="group-hover:scale-110 transition-transform">{displayIcon}</span>
           )}
         </div>
         

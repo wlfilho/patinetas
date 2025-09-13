@@ -13,6 +13,7 @@ interface CategoryWithCount {
   count: number
   slug: string
   featured: boolean
+  icon?: string
 }
 
 export default function CategoriasPage() {
@@ -34,7 +35,7 @@ export default function CategoriasPage() {
 
       // Count businesses per category
       const categoryCounts = availableCategories.reduce((acc, category) => {
-        acc[category] = allBusinesses.filter(b => b.categoria === category).length
+        acc[category.nombre] = allBusinesses.filter(b => b.categoria === category.nombre).length
         return acc
       }, {} as Record<string, number>)
 
@@ -53,11 +54,12 @@ export default function CategoriasPage() {
       }
 
       const categoriesWithData = availableCategories.map(category => ({
-        name: category,
-        description: categoryDescriptions[category] || `Servicios relacionados con ${category.toLowerCase()}.`,
-        count: categoryCounts[category] || 0,
-        slug: generateSlug(category),
-        featured: ['Venta de Patinetas Eléctricas', 'Reparación y Mantenimiento', 'Repuestos y Accesorios'].includes(category)
+        name: category.nombre,
+        description: categoryDescriptions[category.nombre] || `Servicios relacionados con ${category.nombre.toLowerCase()}.`,
+        count: categoryCounts[category.nombre] || 0,
+        slug: generateSlug(category.nombre),
+        featured: ['Venta de Patinetas Eléctricas', 'Reparación y Mantenimiento', 'Repuestos y Accesorios'].includes(category.nombre),
+        icon: category.icono
       }))
 
       // Sort by count (descending) and then by name
@@ -145,6 +147,7 @@ export default function CategoriasPage() {
                     count={category.count}
                     slug={category.slug}
                     featured={true}
+                    icon={category.icon}
                   />
                 ))}
               </div>
@@ -164,6 +167,7 @@ export default function CategoriasPage() {
                     count={category.count}
                     slug={category.slug}
                     featured={category.featured}
+                    icon={category.icon}
                   />
                 ))}
               </div>

@@ -71,6 +71,42 @@ export const CIUDADES_PRINCIPALES = [
   'Popayán', 'Tunja', 'Florencia', 'Riohacha', 'Yopal', 'Quibdó'
 ]
 
+// Cities organized by department for admin forms
+export const CIUDADES_POR_DEPARTAMENTO: Record<string, string[]> = {
+  'Amazonas': ['Leticia', 'Puerto Nariño'],
+  'Antioquia': ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Apartadó', 'Turbo', 'Rionegro', 'Sabaneta'],
+  'Arauca': ['Arauca', 'Tame', 'Saravena'],
+  'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Sabanalarga'],
+  'Bolívar': ['Cartagena', 'Magangué', 'Turbaco', 'Arjona'],
+  'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Chiquinquirá'],
+  'Caldas': ['Manizales', 'Villamaría', 'Chinchiná', 'La Dorada'],
+  'Caquetá': ['Florencia', 'San Vicente del Caguán', 'Puerto Rico'],
+  'Casanare': ['Yopal', 'Aguazul', 'Villanueva', 'Tauramena'],
+  'Cauca': ['Popayán', 'Santander de Quilichao', 'Puerto Tejada'],
+  'Cesar': ['Valledupar', 'Aguachica', 'Bosconia', 'Codazzi'],
+  'Chocó': ['Quibdó', 'Istmina', 'Condoto'],
+  'Córdoba': ['Montería', 'Lorica', 'Cereté', 'Sahagún'],
+  'Cundinamarca': ['Bogotá', 'Soacha', 'Girardot', 'Zipaquirá', 'Facatativá', 'Chía', 'Mosquera', 'Fusagasugá'],
+  'Guainía': ['Inírida'],
+  'Guaviare': ['San José del Guaviare'],
+  'Huila': ['Neiva', 'Pitalito', 'Garzón', 'La Plata'],
+  'La Guajira': ['Riohacha', 'Maicao', 'Valledupar'],
+  'Magdalena': ['Santa Marta', 'Ciénaga', 'Fundación'],
+  'Meta': ['Villavicencio', 'Acacías', 'Granada', 'Puerto López'],
+  'Nariño': ['Pasto', 'Tumaco', 'Ipiales', 'Túquerres'],
+  'Norte de Santander': ['Cúcuta', 'Ocaña', 'Pamplona', 'Villa del Rosario'],
+  'Putumayo': ['Mocoa', 'Puerto Asís', 'Orito'],
+  'Quindío': ['Armenia', 'Calarcá', 'La Tebaida', 'Montenegro'],
+  'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal'],
+  'San Andrés y Providencia': ['San Andrés', 'Providencia'],
+  'Santander': ['Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta', 'Barrancabermeja'],
+  'Sucre': ['Sincelejo', 'Corozal', 'San Marcos'],
+  'Tolima': ['Ibagué', 'Espinal', 'Melgar', 'Honda'],
+  'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Cartago', 'Buga', 'Tuluá'],
+  'Vaupés': ['Mitú'],
+  'Vichada': ['Puerto Carreño']
+}
+
 // Business categories for electric scooters
 export const CATEGORIAS_PATINETAS = [
   'Venta de Patinetas Eléctricas',

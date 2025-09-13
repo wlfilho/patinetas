@@ -5,7 +5,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Database types for diretorio table
+// Database types for diretorio_patinetas table
 export interface NegocioDirectorio {
   id: number
   nombre: string
@@ -26,6 +26,57 @@ export interface NegocioDirectorio {
   activo: boolean
   fecha_creacion: string
   fecha_actualizacion: string
+  category_id?: string
+}
+
+// Database types for categorias_patinetas table
+export interface CategoriaPatineta {
+  id: string
+  nombre: string
+  descripcion?: string
+  icono?: string
+  activo: boolean
+  orden: number
+  created_at?: string
+  updated_at?: string
+}
+
+// Database types for marcas_patinetas table
+export interface MarcaPatineta {
+  id: string
+  nombre: string
+  descripcion?: string
+  logo_url?: string
+  pais_origen?: string
+  sitio_web?: string
+  activo: boolean
+  orden: number
+  created_at?: string
+  updated_at?: string
+}
+
+// Database types for modelos_patinetas table
+export interface ModeloPatineta {
+  id: string
+  marca_id: string
+  nombre: string
+  descripcion?: string
+  imagen_url?: string
+  velocidad_maxima?: number // km/h
+  autonomia?: number // km
+  peso?: number // kg
+  potencia?: number // watts
+  tiempo_carga?: number // horas
+  precio_min?: number // COP
+  precio_max?: number // COP
+  disponible_colombia: boolean
+  especificaciones?: Record<string, any>
+  activo: boolean
+  orden: number
+  created_at?: string
+  updated_at?: string
+  // Joined data from marca
+  marca?: MarcaPatineta
 }
 
 // Mock data for development
@@ -101,7 +152,7 @@ export const negociosService = {
   async getAll() {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('*')
         .eq('activo', true)
         .order('nombre')
@@ -118,7 +169,7 @@ export const negociosService = {
   async getByCategory(categoria: string) {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('*')
         .eq('categoria', categoria)
         .eq('activo', true)
@@ -136,7 +187,7 @@ export const negociosService = {
   async getByCity(ciudad: string) {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('*')
         .eq('ciudad', ciudad)
         .eq('activo', true)
@@ -154,7 +205,7 @@ export const negociosService = {
   async search(query: string) {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('*')
         .or(`nombre.ilike.%${query}%,descripcion.ilike.%${query}%,servicios.cs.{${query}}`)
         .eq('activo', true)
@@ -177,7 +228,7 @@ export const negociosService = {
   async getById(id: number) {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('*')
         .eq('id', id)
         .eq('activo', true)
@@ -197,18 +248,20 @@ export const negociosService = {
   async getCategories() {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
-        .select('categoria')
+        .from('categorias_patinetas')
+        .select('nombre, icono')
         .eq('activo', true)
+        .order('orden', { ascending: true })
 
       if (error) throw error
 
-      const categories = [...new Set(data.map(item => item.categoria))]
-      return categories.sort()
+      return data?.map(cat => ({
+        nombre: cat.nombre,
+        icono: cat.icono
+      })) || []
     } catch (error) {
-      console.warn('Supabase error, using mock data:', error)
-      const categories = [...new Set(mockBusinesses.map(b => b.categoria))]
-      return categories.sort()
+      console.error('Error fetching categories:', error)
+      return []
     }
   },
 
@@ -216,7 +269,7 @@ export const negociosService = {
   async getCities() {
     try {
       const { data, error } = await supabase
-        .from('diretorio')
+        .from('diretorio_patinetas')
         .select('ciudad')
         .eq('activo', true)
 
@@ -229,5 +282,758 @@ export const negociosService = {
       const cities = [...new Set(mockBusinesses.map(b => b.ciudad))]
       return cities.sort()
     }
+  }
+}
+
+// Admin service methods for managing businesses
+export const adminService = {
+  // Get all businesses (including inactive ones) for admin
+  async getAllForAdmin() {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .order('fecha_creacion', { ascending: false })
+
+      if (error) throw error
+      return data as NegocioDirectorio[]
+    } catch (error) {
+      console.error('Error fetching businesses for admin:', error)
+      throw error
+    }
+  },
+
+  // Create a new business
+  async createBusiness(business: Omit<NegocioDirectorio, 'id' | 'fecha_creacion' | 'fecha_actualizacion'>) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .insert([business])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.error('Error creating business:', error)
+      throw error
+    }
+  },
+
+  // Update an existing business
+  async updateBusiness(id: number, updates: Partial<Omit<NegocioDirectorio, 'id' | 'fecha_creacion'>>) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .update({ ...updates, fecha_actualizacion: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.error('Error updating business:', error)
+      throw error
+    }
+  },
+
+  // Delete a business (soft delete by setting activo to false)
+  async deleteBusiness(id: number) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .update({ activo: false, fecha_actualizacion: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.error('Error deleting business:', error)
+      throw error
+    }
+  },
+
+  // Hard delete a business (permanent removal)
+  async hardDeleteBusiness(id: number) {
+    try {
+      const { error } = await supabase
+        .from('diretorio_patinetas')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error hard deleting business:', error)
+      throw error
+    }
+  },
+
+  // Reactivate a business
+  async reactivateBusiness(id: number) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .update({ activo: true, fecha_actualizacion: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.error('Error reactivating business:', error)
+      throw error
+    }
+  }
+}
+
+// Category service functions
+export const categoryService = {
+  // Get all categories (active only for public, all for admin)
+  async getAll(includeInactive = false) {
+    try {
+      let query = supabase
+        .from('categorias_patinetas')
+        .select('*')
+        .order('orden', { ascending: true })
+
+      if (!includeInactive) {
+        query = query.eq('activo', true)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data as CategoriaPatineta[]
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      return []
+    }
+  },
+
+  // Get category by ID
+  async getById(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error fetching category:', error)
+      throw error
+    }
+  },
+
+  // Create new category
+  async create(category: Omit<CategoriaPatineta, 'id' | 'created_at' | 'updated_at'>) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .insert([category])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error creating category:', error)
+      throw error
+    }
+  },
+
+  // Update category
+  async update(id: string, updates: Partial<Omit<CategoriaPatineta, 'id' | 'created_at' | 'updated_at'>>) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error updating category:', error)
+      throw error
+    }
+  },
+
+  // Soft delete category (mark as inactive)
+  async softDelete(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .update({ activo: false })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error soft deleting category:', error)
+      throw error
+    }
+  },
+
+  // Hard delete category (only if no businesses use it)
+  async hardDelete(id: string) {
+    try {
+      // First check if any businesses use this category
+      const businessCount = await this.getBusinessCount(id)
+      if (businessCount > 0) {
+        throw new Error(`No se puede eliminar la categoría porque ${businessCount} negocio(s) la están usando`)
+      }
+
+      const { error } = await supabase
+        .from('categorias_patinetas')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error hard deleting category:', error)
+      throw error
+    }
+  },
+
+  // Get count of businesses using this category
+  async getBusinessCount(categoryId: string) {
+    try {
+      const { count, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', categoryId)
+        .eq('activo', true)
+
+      if (error) throw error
+      return count || 0
+    } catch (error) {
+      console.error('Error getting business count for category:', error)
+      return 0
+    }
+  },
+
+  // Reactivate category
+  async reactivate(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .update({ activo: true })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error reactivating category:', error)
+      throw error
+    }
+  },
+
+  // Update category order
+  async updateOrder(categoryUpdates: { id: string; orden: number }[]) {
+    try {
+      const promises = categoryUpdates.map(({ id, orden }) =>
+        supabase
+          .from('categorias_patinetas')
+          .update({ orden })
+          .eq('id', id)
+      )
+
+      await Promise.all(promises)
+      return true
+    } catch (error) {
+      console.error('Error updating category order:', error)
+      throw error
+    }
+  }
+}
+
+// Brand service functions
+export const brandService = {
+  // Get all brands (active only for public, all for admin)
+  async getAll(includeInactive = false) {
+    try {
+      let query = supabase
+        .from('marcas_patinetas')
+        .select('*')
+        .order('orden', { ascending: true })
+
+      if (!includeInactive) {
+        query = query.eq('activo', true)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data as MarcaPatineta[]
+    } catch (error) {
+      console.error('Error fetching brands:', error)
+      return []
+    }
+  },
+
+  // Get brand by ID
+  async getById(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('marcas_patinetas')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data as MarcaPatineta
+    } catch (error) {
+      console.error('Error fetching brand:', error)
+      throw error
+    }
+  },
+
+  // Create new brand
+  async create(brand: Omit<MarcaPatineta, 'id' | 'created_at' | 'updated_at'>) {
+    try {
+      const { data, error } = await supabase
+        .from('marcas_patinetas')
+        .insert([brand])
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as MarcaPatineta
+    } catch (error) {
+      console.error('Error creating brand:', error)
+      throw error
+    }
+  },
+
+  // Update brand
+  async update(id: string, updates: Partial<Omit<MarcaPatineta, 'id' | 'created_at' | 'updated_at'>>) {
+    try {
+      const { data, error } = await supabase
+        .from('marcas_patinetas')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as MarcaPatineta
+    } catch (error) {
+      console.error('Error updating brand:', error)
+      throw error
+    }
+  },
+
+  // Soft delete brand (mark as inactive)
+  async softDelete(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('marcas_patinetas')
+        .update({ activo: false })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as MarcaPatineta
+    } catch (error) {
+      console.error('Error soft deleting brand:', error)
+      throw error
+    }
+  },
+
+  // Hard delete brand (only if no models use it)
+  async hardDelete(id: string) {
+    try {
+      // First check if any models use this brand
+      const modelCount = await this.getModelCount(id)
+      if (modelCount > 0) {
+        throw new Error(`No se puede eliminar la marca porque ${modelCount} modelo(s) la están usando`)
+      }
+
+      const { error } = await supabase
+        .from('marcas_patinetas')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error hard deleting brand:', error)
+      throw error
+    }
+  },
+
+  // Get count of models using this brand
+  async getModelCount(brandId: string) {
+    try {
+      const { count, error } = await supabase
+        .from('modelos_patinetas')
+        .select('*', { count: 'exact', head: true })
+        .eq('marca_id', brandId)
+        .eq('activo', true)
+
+      if (error) throw error
+      return count || 0
+    } catch (error) {
+      console.error('Error getting model count for brand:', error)
+      return 0
+    }
+  },
+
+  // Reactivate brand
+  async reactivate(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('marcas_patinetas')
+        .update({ activo: true })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as MarcaPatineta
+    } catch (error) {
+      console.error('Error reactivating brand:', error)
+      throw error
+    }
+  }
+}
+
+// Model service functions
+export const modelService = {
+  // Get all models with brand information
+  async getAll(includeInactive = false) {
+    try {
+      let query = supabase
+        .from('modelos_patinetas')
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .order('orden', { ascending: true })
+
+      if (!includeInactive) {
+        query = query.eq('activo', true).eq('disponible_colombia', true)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data as ModeloPatineta[]
+    } catch (error) {
+      console.error('Error fetching models:', error)
+      return []
+    }
+  },
+
+  // Get models by brand
+  async getByBrand(brandId: string, includeInactive = false) {
+    try {
+      let query = supabase
+        .from('modelos_patinetas')
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .eq('marca_id', brandId)
+        .order('orden', { ascending: true })
+
+      if (!includeInactive) {
+        query = query.eq('activo', true).eq('disponible_colombia', true)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data as ModeloPatineta[]
+    } catch (error) {
+      console.error('Error fetching models by brand:', error)
+      return []
+    }
+  },
+
+  // Get model by ID
+  async getById(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('modelos_patinetas')
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data as ModeloPatineta
+    } catch (error) {
+      console.error('Error fetching model:', error)
+      throw error
+    }
+  },
+
+  // Search models
+  async search(query: string, filters?: {
+    brandId?: string
+    priceMin?: number
+    priceMax?: number
+    speedMin?: number
+    speedMax?: number
+    rangeMin?: number
+    rangeMax?: number
+  }) {
+    try {
+      let dbQuery = supabase
+        .from('modelos_patinetas')
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .eq('activo', true)
+        .eq('disponible_colombia', true)
+
+      // Text search
+      if (query) {
+        dbQuery = dbQuery.or(`nombre.ilike.%${query}%,descripcion.ilike.%${query}%`)
+      }
+
+      // Apply filters
+      if (filters?.brandId) {
+        dbQuery = dbQuery.eq('marca_id', filters.brandId)
+      }
+      if (filters?.priceMin) {
+        dbQuery = dbQuery.gte('precio_min', filters.priceMin)
+      }
+      if (filters?.priceMax) {
+        dbQuery = dbQuery.lte('precio_max', filters.priceMax)
+      }
+      if (filters?.speedMin) {
+        dbQuery = dbQuery.gte('velocidad_maxima', filters.speedMin)
+      }
+      if (filters?.speedMax) {
+        dbQuery = dbQuery.lte('velocidad_maxima', filters.speedMax)
+      }
+      if (filters?.rangeMin) {
+        dbQuery = dbQuery.gte('autonomia', filters.rangeMin)
+      }
+      if (filters?.rangeMax) {
+        dbQuery = dbQuery.lte('autonomia', filters.rangeMax)
+      }
+
+      dbQuery = dbQuery.order('orden', { ascending: true })
+
+      const { data, error } = await dbQuery
+
+      if (error) throw error
+      return data as ModeloPatineta[]
+    } catch (error) {
+      console.error('Error searching models:', error)
+      return []
+    }
+  },
+
+  // Create new model
+  async create(model: Omit<ModeloPatineta, 'id' | 'created_at' | 'updated_at' | 'marca'>) {
+    try {
+      const { data, error } = await supabase
+        .from('modelos_patinetas')
+        .insert([model])
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .single()
+
+      if (error) throw error
+      return data as ModeloPatineta
+    } catch (error) {
+      console.error('Error creating model:', error)
+      throw error
+    }
+  },
+
+  // Update model
+  async update(id: string, updates: Partial<Omit<ModeloPatineta, 'id' | 'created_at' | 'updated_at' | 'marca'>>) {
+    try {
+      const { data, error } = await supabase
+        .from('modelos_patinetas')
+        .update(updates)
+        .eq('id', id)
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .single()
+
+      if (error) throw error
+      return data as ModeloPatineta
+    } catch (error) {
+      console.error('Error updating model:', error)
+      throw error
+    }
+  },
+
+  // Soft delete model
+  async softDelete(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('modelos_patinetas')
+        .update({ activo: false })
+        .eq('id', id)
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .single()
+
+      if (error) throw error
+      return data as ModeloPatineta
+    } catch (error) {
+      console.error('Error soft deleting model:', error)
+      throw error
+    }
+  },
+
+  // Hard delete model
+  async hardDelete(id: string) {
+    try {
+      const { error } = await supabase
+        .from('modelos_patinetas')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error hard deleting model:', error)
+      throw error
+    }
+  },
+
+  // Reactivate model
+  async reactivate(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('modelos_patinetas')
+        .update({ activo: true })
+        .eq('id', id)
+        .select(`
+          *,
+          marca:marcas_patinetas(*)
+        `)
+        .single()
+
+      if (error) throw error
+      return data as ModeloPatineta
+    } catch (error) {
+      console.error('Error reactivating model:', error)
+      throw error
+    }
+  }
+}
+
+// File upload service functions
+export const uploadService = {
+  // Upload brand logo to Supabase Storage
+  async uploadBrandLogo(file: File, brandId?: string): Promise<string> {
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${brandId || Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `logos/${fileName}`
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('brand-logos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) throw error
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('brand-logos')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Error uploading brand logo:', error)
+      throw error
+    }
+  },
+
+  // Delete brand logo from Supabase Storage
+  async deleteBrandLogo(logoUrl: string): Promise<boolean> {
+    try {
+      // Extract file path from URL
+      const url = new URL(logoUrl)
+      const pathParts = url.pathname.split('/')
+      const bucketIndex = pathParts.findIndex(part => part === 'brand-logos')
+
+      if (bucketIndex === -1) {
+        throw new Error('Invalid logo URL format')
+      }
+
+      const filePath = pathParts.slice(bucketIndex + 1).join('/')
+
+      const { error } = await supabase.storage
+        .from('brand-logos')
+        .remove([filePath])
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error deleting brand logo:', error)
+      // Don't throw error for delete operations to avoid blocking other operations
+      return false
+    }
+  },
+
+  // Validate file before upload
+  validateFile(file: File): { valid: boolean; error?: string } {
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp']
+
+    if (!allowedTypes.includes(file.type)) {
+      return {
+        valid: false,
+        error: 'Tipo de archivo no válido. Solo se permiten PNG, JPG, JPEG, SVG y WebP.'
+      }
+    }
+
+    if (file.size > maxSize) {
+      return {
+        valid: false,
+        error: 'El archivo es demasiado grande. El tamaño máximo es 5MB.'
+      }
+    }
+
+    return { valid: true }
+  },
+
+  // Get file info for preview
+  getFilePreview(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => resolve(e.target?.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
 }

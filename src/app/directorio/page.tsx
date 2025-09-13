@@ -11,7 +11,7 @@ function DirectorioContent() {
   const [businesses, setBusinesses] = useState<NegocioDirectorio[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<{nombre: string, icono: string}[]>([])
   const [cities, setCities] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedCity, setSelectedCity] = useState<string>('')
@@ -162,8 +162,8 @@ function DirectorioContent() {
                 >
                   <option value="">Todas las categorías</option>
                   {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                    <option key={category.nombre} value={category.nombre}>
+                      {category.icono} {category.nombre}
                     </option>
                   ))}
                 </select>

@@ -21,10 +21,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/categorias`,
+      url: `${baseUrl}/catalogo`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/categorias`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/buscar`,
@@ -53,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Category pages
     const categories = await negociosService.getCategories()
     const categoryPages = categories.map(category => ({
-      url: `${baseUrl}/categorias/${generateSlug(category)}`,
+      url: `${baseUrl}/categorias/${generateSlug(category.nombre)}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,

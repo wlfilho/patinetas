@@ -1,0 +1,7 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" fill="#F3F4F6"/>
+  <rect x="32" y="32" width="64" height="64" rx="8" fill="#E5E7EB"/>
+  <path d="M56 52H72V56H56V52ZM56 60H72V64H56V60ZM56 68H64V72H56V68Z" fill="#9CA3AF"/>
+  <circle cx="48" cy="48" r="4" fill="#9CA3AF"/>
+  <text x="64" y="96" text-anchor="middle" fill="#6B7280" font-family="Arial, sans-serif" font-size="10">Logo</text>
+</svg>
