@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import SearchBar from '@/components/ui/SearchBar'
 import CategoryCard from '@/components/ui/CategoryCard'
+import BrandCarousel from '@/components/ui/BrandCarousel'
 
 import { generateSlug } from '@/lib/utils'
 
@@ -120,6 +121,40 @@ export default function Home() {
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors"
             >
               Ver Todas las Categorías
+              <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Brand Carousel Section */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Marcas Destacadas
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Descubre las mejores marcas de patinetas eléctricas disponibles en Colombia
+            </p>
+          </div>
+
+          <BrandCarousel
+            autoPlay={true}
+            autoPlayInterval={4000}
+            showNavigation={true}
+            showDots={true}
+            className="mb-8"
+          />
+
+          <div className="text-center">
+            <Link
+              href="/catalogo/marcas"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors"
+            >
+              Ver Todas las Marcas
               <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

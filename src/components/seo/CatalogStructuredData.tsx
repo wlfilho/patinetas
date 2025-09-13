@@ -1,4 +1,4 @@
-import { ModeloPatineta } from '@/lib/supabase'
+import { ModeloPatineta, MarcaPatineta } from '@/lib/supabase'
 
 interface CatalogStructuredDataProps {
   models?: ModeloPatineta[]
@@ -139,6 +139,48 @@ export function ModelStructuredData({ model }: ModelStructuredDataProps) {
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(productData) }}
+    />
+  )
+}
+
+interface BrandsStructuredDataProps {
+  brands: MarcaPatineta[]
+}
+
+export function BrandsStructuredData({ brands }: BrandsStructuredDataProps) {
+  const baseUrl = 'https://staging.motoselectricas.com.co'
+
+  const brandsData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Marcas de Patinetas Eléctricas Colombia",
+    "description": "Directorio completo de marcas de patinetas eléctricas disponibles en Colombia",
+    "url": `${baseUrl}/catalogo/marcas`,
+    "numberOfItems": brands.length,
+    "itemListElement": brands.map((brand, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Brand",
+        "name": brand.nombre,
+        "description": brand.descripcion,
+        "logo": brand.logo_url,
+        "url": `${baseUrl}/catalogo?marca=${brand.id}`,
+        ...(brand.sitio_web && { "sameAs": brand.sitio_web }),
+        ...(brand.pais_origen && {
+          "location": {
+            "@type": "Country",
+            "name": brand.pais_origen
+          }
+        })
+      }
+    }))
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(brandsData) }}
     />
   )
 }

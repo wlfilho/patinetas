@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
 import { CatalogStructuredData } from '@/components/seo/CatalogStructuredData'
+import CatalogNavigation from '@/components/ui/CatalogNavigation'
 import Link from 'next/link'
 
 interface CatalogFilters {
@@ -153,6 +154,7 @@ export default function CatalogoPage() {
     <>
       <CatalogStructuredData models={filteredModels} />
       <div className="min-h-screen bg-gray-50">
+        <CatalogNavigation />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-white to-secondary/10 py-16">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
