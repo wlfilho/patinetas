@@ -19,6 +19,9 @@ export default function BrandsDirectoryPage() {
   const [sortBy, setSortBy] = useState<'name' | 'country' | 'models'>('name')
   const [filterByCountry, setFilterByCountry] = useState('')
 
+  // Force route precedence - this should be the brands page, not dynamic [id]
+  console.log('BrandsDirectoryPage loaded - this is /catalogo/marcas')
+
   useEffect(() => {
     loadBrands()
   }, [])
