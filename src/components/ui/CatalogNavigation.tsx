@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 const catalogNavigation = [
   { name: 'Todos los Modelos', href: '/catalogo', icon: '🛴' },
-  { name: 'Marcas', href: '/catalogo/marcas', icon: '🏷️' },
+  { name: 'Marcas', href: '/marcas', icon: '🏷️' },
 ]
 
 export default function CatalogNavigation() {
