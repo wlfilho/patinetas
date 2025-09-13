@@ -131,7 +131,7 @@ export default function BrandCarousel({
               style={{ width: `${100 / brandsPerSlide}%` }}
             >
               <Link
-                href={`/catalogo?marca=${brand.id}`}
+                href={`/catalogo/marcas/${brand.slug}`}
                 className="block group"
                 aria-label={`Ver modelos de ${brand.nombre}`}
               >

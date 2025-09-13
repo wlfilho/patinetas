@@ -61,6 +61,8 @@ export interface MarcaPatineta {
   orden: number
   created_at?: string
   updated_at?: string
+  // Virtual field for slug (generated from nombre)
+  slug?: string
 }
 
 // Database types for modelos_patinetas table
@@ -586,7 +588,15 @@ export const brandService = {
       const { data, error } = await query
 
       if (error) throw error
-      return data as MarcaPatineta[]
+
+      // Add slugs to brands
+      const { getBrandSlug } = await import('./slugs')
+      const brandsWithSlugs = data.map(brand => ({
+        ...brand,
+        slug: getBrandSlug(brand.nombre)
+      }))
+
+      return brandsWithSlugs as MarcaPatineta[]
     } catch (error) {
       console.error('Error fetching brands:', error)
       return []
@@ -606,6 +616,26 @@ export const brandService = {
       return data as MarcaPatineta
     } catch (error) {
       console.error('Error fetching brand:', error)
+      throw error
+    }
+  },
+
+  // Get brand by slug
+  async getBySlug(slug: string) {
+    try {
+      const { getBrandSlug } = await import('./slugs')
+
+      // Get all brands and find the one with matching slug
+      const brands = await this.getAll()
+      const brand = brands.find(b => getBrandSlug(b.nombre) === slug)
+
+      if (!brand) {
+        throw new Error(`Brand not found for slug: ${slug}`)
+      }
+
+      return brand
+    } catch (error) {
+      console.error('Error fetching brand by slug:', error)
       throw error
     }
   },

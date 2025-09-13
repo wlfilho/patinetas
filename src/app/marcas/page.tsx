@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import Head from 'next/head'
 import { brandService, MarcaPatineta } from '@/lib/supabase'
@@ -209,7 +208,7 @@ export default function BrandsDirectoryPage() {
               {filteredAndSortedBrands.map((brand) => (
                 <Link
                   key={brand.id}
-                  href={`/catalogo?marca=${brand.id}`}
+                  href={`/catalogo/marcas/${brand.slug}`}
                   className="group"
                 >
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group-hover:scale-105">

@@ -1,4 +1,5 @@
 import { ModeloPatineta, MarcaPatineta } from '@/lib/supabase'
+import { getBrandSlug } from '@/lib/slugs'
 
 interface CatalogStructuredDataProps {
   models?: ModeloPatineta[]
@@ -165,7 +166,7 @@ export function BrandsStructuredData({ brands }: BrandsStructuredDataProps) {
         "name": brand.nombre,
         "description": brand.descripcion,
         "logo": brand.logo_url,
-        "url": `${baseUrl}/catalogo?marca=${brand.id}`,
+        "url": `${baseUrl}/catalogo/marcas/${brand.slug || getBrandSlug(brand.nombre)}`,
         ...(brand.sitio_web && { "sameAs": brand.sitio_web }),
         ...(brand.pais_origen && {
           "location": {

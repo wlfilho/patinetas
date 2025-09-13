@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
 import { CatalogStructuredData } from '@/components/seo/CatalogStructuredData'
@@ -18,6 +19,7 @@ interface CatalogFilters {
 }
 
 export default function CatalogoPage() {
+  const searchParams = useSearchParams()
   const [brands, setBrands] = useState<MarcaPatineta[]>([])
   const [models, setModels] = useState<ModeloPatineta[]>([])
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>([])
@@ -34,6 +36,14 @@ export default function CatalogoPage() {
     rangeMin: '',
     rangeMax: ''
   })
+
+  // Handle URL parameters for backward compatibility
+  useEffect(() => {
+    const marcaParam = searchParams.get('marca')
+    if (marcaParam && marcaParam !== selectedBrand) {
+      setSelectedBrand(marcaParam)
+    }
+  }, [searchParams, selectedBrand])
 
   useEffect(() => {
     loadData()
