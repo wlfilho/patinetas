@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { brandService, MarcaPatineta } from '@/lib/supabase'
+import { getBrandSlug } from '@/lib/slugs'
 
 interface BrandCarouselProps {
   autoPlay?: boolean
@@ -131,7 +132,7 @@ export default function BrandCarousel({
               style={{ width: `${100 / brandsPerSlide}%` }}
             >
               <Link
-                href={`/catalogo/marcas/${brand.slug}`}
+                href={`/catalogo/marcas?slug=${getBrandSlug(brand.nombre)}`}
                 className="block group"
                 aria-label={`Ver modelos de ${brand.nombre}`}
               >

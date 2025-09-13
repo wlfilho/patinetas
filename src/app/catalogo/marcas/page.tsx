@@ -1,39 +1,53 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import Head from 'next/head'
-import { brandService, MarcaPatineta } from '@/lib/supabase'
+import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
+import { getBrandSlug } from '@/lib/slugs'
 import { BrandsStructuredData } from '@/components/seo/CatalogStructuredData'
 import CatalogNavigation from '@/components/ui/CatalogNavigation'
+import BrandCatalogClient from './[slug]/BrandCatalogClient'
 
 interface BrandWithModelCount extends MarcaPatineta {
   modelCount: number
 }
 
 export default function BrandsDirectoryPage() {
+  const searchParams = useSearchParams()
   const [brands, setBrands] = useState<BrandWithModelCount[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'country' | 'models'>('name')
   const [filterByCountry, setFilterByCountry] = useState('')
 
-  // Force route precedence - this should be the brands page, not dynamic [id]
-  console.log('BrandsDirectoryPage loaded - this is /catalogo/marcas')
+  // Brand-specific state for fallback handling
+  const [selectedBrand, setSelectedBrand] = useState<MarcaPatineta | null>(null)
+  const [brandModels, setBrandModels] = useState<ModeloPatineta[]>([])
+  const [brandLoading, setBrandLoading] = useState(false)
 
-  // Debug: Log to confirm this is the correct component
-  console.log('Route params should be empty for static route:', typeof window !== 'undefined' ? window.location.pathname : 'SSR')
+  // Check if we're viewing a specific brand via query params (fallback for dynamic routes)
+  const brandId = searchParams.get('marca')
+  const slug = searchParams.get('slug')
+  const isViewingBrand = !!(brandId || slug)
+
+  console.log('BrandsDirectoryPage loaded - checking for brand params:', { brandId, slug, isViewingBrand })
 
   useEffect(() => {
-    loadBrands()
-  }, [])
+    if (isViewingBrand) {
+      loadSpecificBrand()
+    } else {
+      loadBrands()
+    }
+  }, [brandId, slug, isViewingBrand])
 
   const loadBrands = async () => {
     try {
       setLoading(true)
       const brandsData = await brandService.getAll(false) // Only active brands
-      
+
       // Get model count for each brand
       const brandsWithCounts = await Promise.all(
         brandsData.map(async (brand) => {
@@ -47,6 +61,50 @@ export default function BrandsDirectoryPage() {
       console.error('Error loading brands:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadSpecificBrand = async () => {
+    try {
+      setBrandLoading(true)
+      let targetBrand: MarcaPatineta | null = null
+
+      if (slug) {
+        // Try to find brand by slug
+        console.log(`[FALLBACK] Loading brand by slug: ${slug}`)
+        const brands = await brandService.getAll()
+        targetBrand = brands.find(b => getBrandSlug(b.nombre) === slug) || null
+      } else if (brandId) {
+        // Try to find brand by ID
+        console.log(`[FALLBACK] Loading brand by ID: ${brandId}`)
+        targetBrand = await brandService.getById(brandId)
+      }
+
+      if (targetBrand) {
+        setSelectedBrand(targetBrand)
+        console.log(`[FALLBACK] Brand loaded: ${targetBrand.nombre}`)
+
+        // Load models for this brand
+        const allModels = await modelService.getAll()
+        const brandModels = allModels.filter(model =>
+          model.marca_id === targetBrand.id && model.activo
+        )
+        setBrandModels(brandModels)
+        console.log(`[FALLBACK] Found ${brandModels.length} models for ${targetBrand.nombre}`)
+
+        // Update URL to use slug format if we have a brand
+        const brandSlug = getBrandSlug(targetBrand.nombre)
+        if (typeof window !== 'undefined') {
+          const expectedPath = `/catalogo/marcas/${brandSlug}`
+          if (window.location.pathname !== expectedPath) {
+            window.history.replaceState({}, '', expectedPath)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[FALLBACK] Error loading brand data:', error)
+    } finally {
+      setBrandLoading(false)
     }
   }
 
@@ -81,6 +139,51 @@ export default function BrandsDirectoryPage() {
 
     return filtered
   }, [brands, searchQuery, sortBy, filterByCountry])
+
+  // If viewing a specific brand, render the brand catalog
+  if (isViewingBrand) {
+    if (brandLoading) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando información de la marca...</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (!selectedBrand) {
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <CatalogNavigation />
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center max-w-md mx-auto px-6">
+              <div className="mb-6">
+                <div className="mx-auto h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center">
+                  <svg className="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.87 0-5.43 1.51-6.84 3.891M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9-4.03-9-9-9z" />
+                  </svg>
+                </div>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Marca no encontrada</h1>
+              <p className="text-gray-600 mb-8">
+                Lo sentimos, no pudimos encontrar información sobre esta marca de patinetas eléctricas.
+              </p>
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                Ver todas las marcas
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return <BrandCatalogClient brand={selectedBrand} initialModels={brandModels} />
+  }
 
   if (loading) {
     return (
@@ -209,7 +312,7 @@ export default function BrandsDirectoryPage() {
               {filteredAndSortedBrands.map((brand) => (
                 <Link
                   key={brand.id}
-                  href={`/catalogo/marcas/${brand.slug}`}
+                  href={`/catalogo/marcas?slug=${getBrandSlug(brand.nombre)}`}
                   className="group"
                 >
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group-hover:scale-105">
