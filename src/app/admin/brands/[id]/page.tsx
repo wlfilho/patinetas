@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { brandService, MarcaPatineta, uploadService } from '@/lib/supabase'
 import FileUpload from '@/components/ui/FileUpload'
@@ -23,13 +23,7 @@ export default function EditBrandPage() {
     orden: 0
   })
 
-  useEffect(() => {
-    if (params.id) {
-      loadBrand(params.id as string)
-    }
-  }, [params.id])
-
-  const loadBrand = async (id: string) => {
+  const loadBrand = useCallback(async (id: string) => {
     try {
       setLoading(true)
       const brandData = await brandService.getById(id)
@@ -50,7 +44,13 @@ export default function EditBrandPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    if (params.id) {
+      loadBrand(params.id as string)
+    }
+  }, [params.id, loadBrand])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -100,9 +100,9 @@ export default function EditBrandPage() {
 
       await brandService.update(brand.id, formData)
       router.push('/admin/brands')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating brand:', error)
-      alert(error.message || 'Error al actualizar la marca')
+      alert(error instanceof Error ? error.message : 'Error al actualizar la marca')
     } finally {
       setSaving(false)
     }
@@ -118,9 +118,9 @@ export default function EditBrandPage() {
     try {
       await brandService.hardDelete(brand.id)
       router.push('/admin/brands')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting brand:', error)
-      alert(error.message || 'Error al eliminar la marca')
+      alert(error instanceof Error ? error.message : 'Error al eliminar la marca')
     }
   }
 

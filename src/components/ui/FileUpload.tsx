@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import { uploadService } from '@/lib/supabase'
 
 interface FileUploadProps {
@@ -37,24 +38,7 @@ export default function FileUpload({
     setIsDragging(false)
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    
-    const files = Array.from(e.dataTransfer.files)
-    if (files.length > 0) {
-      handleFileUpload(files[0])
-    }
-  }, [])
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      handleFileUpload(files[0])
-    }
-  }, [])
-
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     setError(null)
     
     // Validate file
@@ -100,16 +84,33 @@ export default function FileUpload({
         setIsUploading(false)
       }, 1000)
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Upload error:', error)
-      const errorMessage = error.message || 'Error al subir el archivo'
+      const errorMessage = error instanceof Error ? error.message : 'Error al subir el archivo'
       setError(errorMessage)
       onUploadError?.(errorMessage)
       setIsUploading(false)
       setUploadProgress(0)
       setPreviewUrl(currentImageUrl || null)
     }
-  }
+  }, [brandId, currentImageUrl, onUploadComplete, onUploadError, onUploadStart])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      handleFileUpload(files[0])
+    }
+  }, [handleFileUpload])
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      handleFileUpload(files[0])
+    }
+  }, [handleFileUpload])
 
   const handleRemoveImage = () => {
     setPreviewUrl(null)
@@ -212,9 +213,11 @@ export default function FileUpload({
           </label>
           <div className="relative inline-block">
             <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <img
+              <Image
                 src={previewUrl}
                 alt="Vista previa del logo"
+                width={128}
+                height={128}
                 className="w-32 h-32 object-contain mx-auto"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/placeholder-logo.svg'

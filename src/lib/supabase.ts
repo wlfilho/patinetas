@@ -70,7 +70,7 @@ export interface ModeloPatineta {
   precio_min?: number // COP
   precio_max?: number // COP
   disponible_colombia: boolean
-  especificaciones?: Record<string, any>
+  especificaciones?: Record<string, unknown>
   activo: boolean
   orden: number
   created_at?: string
@@ -957,7 +957,7 @@ export const uploadService = {
       const filePath = `logos/${fileName}`
 
       // Upload file to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('brand-logos')
         .upload(filePath, file, {
           cacheControl: '3600',

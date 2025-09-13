@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { brandService, MarcaPatineta } from '@/lib/supabase'
+import { brandService } from '@/lib/supabase'
 import FileUpload from '@/components/ui/FileUpload'
 import Link from 'next/link'
 
@@ -60,9 +60,9 @@ export default function NewBrandPage() {
       setLoading(true)
       await brandService.create(formData)
       router.push('/admin/brands')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating brand:', error)
-      alert(error.message || 'Error al crear la marca')
+      alert(error instanceof Error ? error.message : 'Error al crear la marca')
     } finally {
       setLoading(false)
     }

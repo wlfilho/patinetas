@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
 import { CatalogStructuredData } from '@/components/seo/CatalogStructuredData'
 import Link from 'next/link'
@@ -321,9 +322,11 @@ export default function CatalogoPage() {
                   {/* Model Image */}
                   <div className="aspect-w-16 aspect-h-12 bg-gray-100">
                     {model.imagen_url ? (
-                      <img
+                      <Image
                         src={model.imagen_url}
                         alt={`${model.marca?.nombre} ${model.nombre}`}
+                        width={400}
+                        height={200}
                         className="w-full h-48 object-cover"
                       />
                     ) : (
@@ -436,9 +439,11 @@ export default function CatalogoPage() {
                 }`}
               >
                 {brand.logo_url ? (
-                  <img
+                  <Image
                     src={brand.logo_url}
                     alt={brand.nombre}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 mx-auto mb-3 object-contain"
                   />
                 ) : (

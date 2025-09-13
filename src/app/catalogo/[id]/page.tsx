@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { modelService, ModeloPatineta } from '@/lib/supabase'
 import { ModelStructuredData } from '@/components/seo/CatalogStructuredData'
 import Link from 'next/link'
@@ -107,9 +108,11 @@ export default function ModelDetailPage() {
             {/* Model Image */}
             <div className="aspect-w-16 aspect-h-12">
               {model.imagen_url ? (
-                <img
+                <Image
                   src={model.imagen_url}
                   alt={`${model.marca?.nombre} ${model.nombre}`}
+                  width={800}
+                  height={400}
                   className="w-full h-96 object-cover rounded-xl"
                 />
               ) : (
@@ -215,7 +218,7 @@ export default function ModelDetailPage() {
                         <div key={key} className="flex justify-between py-2 border-b border-gray-100 last:border-b-0">
                           <span className="text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
                           <span className="font-medium text-gray-900">
-                            {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : value}
+                            {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value)}
                           </span>
                         </div>
                       ))}
@@ -257,9 +260,11 @@ export default function ModelDetailPage() {
             
             <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               {model.marca.logo_url && (
-                <img
+                <Image
                   src={model.marca.logo_url}
                   alt={model.marca.nombre}
+                  width={128}
+                  height={128}
                   className="w-32 h-32 object-contain"
                 />
               )}

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { brandService, MarcaPatineta } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -9,11 +10,7 @@ export default function AdminBrandsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
 
-  useEffect(() => {
-    loadBrands()
-  }, [])
-
-  const loadBrands = async () => {
+  const loadBrands = useCallback(async () => {
     try {
       setLoading(true)
       const data = await brandService.getAll(true) // Include inactive brands for admin
@@ -23,7 +20,11 @@ export default function AdminBrandsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadBrands()
+  }, [loadBrands])
 
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
@@ -47,9 +48,9 @@ export default function AdminBrandsPage() {
     try {
       await brandService.hardDelete(id)
       await loadBrands()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting brand:', error)
-      alert(error.message || 'Error al eliminar la marca')
+      alert(error instanceof Error ? error.message : 'Error al eliminar la marca')
     }
   }
 
@@ -201,9 +202,11 @@ export default function AdminBrandsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {brand.logo_url ? (
-                        <img
+                        <Image
                           src={brand.logo_url}
                           alt={brand.nombre}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 object-contain mr-4"
                         />
                       ) : (
