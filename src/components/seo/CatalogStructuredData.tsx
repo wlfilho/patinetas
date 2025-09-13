@@ -28,7 +28,7 @@ export function CatalogStructuredData({ models = [] }: CatalogStructuredDataProp
           "url": model.marca?.sitio_web
         },
         "image": model.imagen_url,
-        "url": `${baseUrl}/catalogo/${model.id}`,
+        "url": `${baseUrl}/catalogo/modelo/${model.id}`,
         ...(model.precio_min && model.precio_max && {
           "offers": {
             "@type": "AggregateOffer",
@@ -90,7 +90,7 @@ export function ModelStructuredData({ model }: ModelStructuredDataProps) {
       "url": model.marca?.sitio_web
     },
     "image": model.imagen_url,
-    "url": `${baseUrl}/catalogo/${model.id}`,
+    "url": `${baseUrl}/catalogo/modelo/${model.id}`,
     ...(model.precio_min && model.precio_max && {
       "offers": {
         "@type": "AggregateOffer",
