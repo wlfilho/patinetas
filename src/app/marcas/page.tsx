@@ -216,18 +216,21 @@ export default function BrandsDirectoryPage() {
                     {/* Brand Logo */}
                     <div className="aspect-square relative mb-4 bg-gray-50 rounded-lg overflow-hidden">
                       {brand.logo_url ? (
-                        <Image
+                        <img
                           src={brand.logo_url}
                           alt={`Logo de ${brand.nombre}`}
-                          fill
-                          className="object-contain p-4"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          className="w-full h-full object-contain p-4"
+                          loading="lazy"
+                          onError={(e) => {
+                            console.error('Image failed to load:', brand.logo_url);
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-4xl text-gray-400">🛴</div>
-                        </div>
-                      )}
+                      ) : null}
+                      <div className={`w-full h-full flex items-center justify-center text-gray-400 ${brand.logo_url ? 'hidden' : ''}`}>
+                        <div className="text-4xl">🛴</div>
+                      </div>
                     </div>
 
                     {/* Brand Info */}
