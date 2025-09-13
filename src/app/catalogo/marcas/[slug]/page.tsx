@@ -10,14 +10,18 @@ interface BrandCatalogPageProps {
 
 async function getBrandBySlug(slug: string) {
   try {
+    console.log(`[DEBUG] Attempting to fetch brand for slug: ${slug}`)
+
     if (!isValidSlug(slug)) {
+      console.log(`[DEBUG] Invalid slug: ${slug}`)
       return null
     }
-    
+
     const brand = await brandService.getBySlug(slug)
+    console.log(`[DEBUG] Brand found:`, brand ? `${brand.nombre} (${brand.id})` : 'null')
     return brand
   } catch (error) {
-    console.error('Error fetching brand by slug:', error)
+    console.error('[ERROR] Error fetching brand by slug:', error)
     return null
   }
 }
@@ -99,13 +103,18 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
 
 export default async function BrandCatalogPage({ params }: BrandCatalogPageProps) {
   const { slug } = await params
+  console.log(`[DEBUG] BrandCatalogPage called with slug: ${slug}`)
+
   const brand = await getBrandBySlug(slug)
 
   if (!brand) {
+    console.log(`[DEBUG] Brand not found for slug: ${slug}, calling notFound()`)
     notFound()
   }
 
+  console.log(`[DEBUG] Fetching models for brand: ${brand.nombre} (${brand.id})`)
   const models = await getModelsByBrand(brand.id)
+  console.log(`[DEBUG] Found ${models.length} models for brand: ${brand.nombre}`)
 
   return (
     <BrandCatalogClient

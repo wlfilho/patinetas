@@ -623,11 +623,20 @@ export const brandService = {
   // Get brand by slug
   async getBySlug(slug: string) {
     try {
+      console.log(`[DEBUG] brandService.getBySlug called with slug: ${slug}`)
       const { getBrandSlug } = await import('./slugs')
 
       // Get all brands and find the one with matching slug
+      console.log(`[DEBUG] Fetching all brands...`)
       const brands = await this.getAll()
+      console.log(`[DEBUG] Found ${brands.length} brands total`)
+
+      // Debug: show all brand slugs
+      const brandSlugs = brands.map(b => ({ name: b.nombre, slug: getBrandSlug(b.nombre) }))
+      console.log(`[DEBUG] Available brand slugs:`, brandSlugs)
+
       const brand = brands.find(b => getBrandSlug(b.nombre) === slug)
+      console.log(`[DEBUG] Brand match for slug '${slug}':`, brand ? `${brand.nombre} (${brand.id})` : 'null')
 
       if (!brand) {
         throw new Error(`Brand not found for slug: ${slug}`)
@@ -635,7 +644,7 @@ export const brandService = {
 
       return brand
     } catch (error) {
-      console.error('Error fetching brand by slug:', error)
+      console.error('[ERROR] Error fetching brand by slug:', error)
       throw error
     }
   },
