@@ -150,7 +150,7 @@ export default function PrivacidadPage() {
               <p className="text-gray-600 leading-relaxed">
                 Podemos actualizar esta política de privacidad ocasionalmente. Le notificaremos sobre 
                 cambios significativos publicando la nueva política en nuestro sitio web y actualizando 
-                la fecha de "última actualización". Su uso continuado del sitio después de dichos cambios 
+                la fecha de &quot;última actualización&quot;. Su uso continuado del sitio después de dichos cambios
                 constituye su aceptación de la nueva política.
               </p>
             </div>

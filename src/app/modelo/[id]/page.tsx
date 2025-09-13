@@ -2,8 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
-import { ModeloPatineta } from '@/types/database'
+import { supabase, ModeloPatineta } from '@/lib/supabase'
 
 interface ModelPageProps {
   params: Promise<{ id: string }>
@@ -181,24 +180,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
                     <dd className="mt-1 text-sm text-gray-900">{model.peso} kg</dd>
                   </div>
                 )}
-                {model.carga_maxima && (
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500">Carga Máxima</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{model.carga_maxima} kg</dd>
-                  </div>
-                )}
+
                 {model.tiempo_carga && (
                   <div className="border border-gray-200 rounded-lg p-4">
                     <dt className="text-sm font-medium text-gray-500">Tiempo de Carga</dt>
                     <dd className="mt-1 text-sm text-gray-900">{model.tiempo_carga} horas</dd>
                   </div>
                 )}
-                {model.tipo_bateria && (
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500">Tipo de Batería</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{model.tipo_bateria}</dd>
-                  </div>
-                )}
+
               </div>
             </div>
 

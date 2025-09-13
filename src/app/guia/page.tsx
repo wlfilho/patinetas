@@ -62,7 +62,7 @@ export default function GuiaPage() {
                   Usa el buscador principal para encontrar negocios cerca de ti. Puedes buscar por:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  <li>Ciudad (ej: "Bogotá", "Medellín", "Cali")</li>
+                  <li>Ciudad (ej: &quot;Bogotá&quot;, &quot;Medellín&quot;, &quot;Cali&quot;)</li>
                   <li>Barrio o zona específica</li>
                   <li>Nombre del negocio</li>
                   <li>Tipo de servicio</li>

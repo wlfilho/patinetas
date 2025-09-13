@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
@@ -18,7 +18,7 @@ interface CatalogFilters {
   rangeMax: string
 }
 
-export default function CatalogoPage() {
+function CatalogoPageContent() {
   const searchParams = useSearchParams()
   const [brands, setBrands] = useState<MarcaPatineta[]>([])
   const [models, setModels] = useState<ModeloPatineta[]>([])
@@ -476,5 +476,13 @@ export default function CatalogoPage() {
       </section>
       </div>
     </>
+  )
+}
+
+export default function CatalogoPage() {
+  return (
+    <Suspense fallback={<div>Cargando catálogo...</div>}>
+      <CatalogoPageContent />
+    </Suspense>
   )
 }

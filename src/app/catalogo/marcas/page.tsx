@@ -23,7 +23,7 @@ export default function BrandsDirectoryPage() {
   console.log('BrandsDirectoryPage loaded - this is /catalogo/marcas')
 
   // Debug: Log to confirm this is the correct component
-  console.log('Route params should be empty for static route:', window?.location?.pathname)
+  console.log('Route params should be empty for static route:', typeof window !== 'undefined' ? window.location.pathname : 'SSR')
 
   useEffect(() => {
     loadBrands()
