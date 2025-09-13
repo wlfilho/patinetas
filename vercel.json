@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "src/app/api/brands/[slug]/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/catalogo/marcas/:slug",
+      "destination": "/catalogo/marcas/[slug]"
+    },
+    {
+      "source": "/api/brands/:slug",
+      "destination": "/api/brands/[slug]"
+    }
+  ]
+}

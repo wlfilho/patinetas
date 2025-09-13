@@ -139,27 +139,36 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
 // Enable dynamic params for brands not in generateStaticParams
 export const dynamicParams = true
 
+// Force dynamic rendering to ensure routes work in production
+export const dynamic = 'force-dynamic'
+
 // Generate static params for popular brands to ensure they work in production
 export async function generateStaticParams() {
   console.log('[DEBUG] generateStaticParams called - generating static paths for known brands')
 
-  // Return predefined slugs for popular brands to ensure they're statically generated
-  const knownBrandSlugs = [
-    'xiaomi',
-    'segway',
-    'ninebot',
-    'kugoo',
-    'dualtron',
-    'zero',
-    'inokim',
-    'kaabo',
-    'vsett',
-    'minimotors'
-  ]
+  try {
+    // Try to generate static paths, but don't fail the build if it doesn't work
+    const knownBrandSlugs = [
+      'xiaomi',
+      'segway',
+      'ninebot',
+      'kugoo',
+      'dualtron',
+      'zero',
+      'inokim',
+      'kaabo',
+      'vsett',
+      'minimotors'
+    ]
 
-  console.log('[DEBUG] Generating static params for brands:', knownBrandSlugs)
+    console.log('[DEBUG] Generating static params for brands:', knownBrandSlugs)
 
-  return knownBrandSlugs.map((slug) => ({
-    slug: slug,
-  }))
+    return knownBrandSlugs.map((slug) => ({
+      slug: slug,
+    }))
+  } catch (error) {
+    console.error('[DEBUG] Error in generateStaticParams:', error)
+    // Return empty array if there's an error to prevent build failure
+    return []
+  }
 }
