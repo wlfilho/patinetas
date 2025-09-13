@@ -404,7 +404,7 @@ export default function CatalogoPage() {
 
                     {/* Action Button */}
                     <Link
-                      href={`/catalogo/modelo/${model.id}`}
+                      href={`/modelo/${model.id}`}
                       className="block w-full text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium"
                     >
                       Ver Detalles
