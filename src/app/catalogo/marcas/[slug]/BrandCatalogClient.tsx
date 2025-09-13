@@ -8,8 +8,9 @@ import CatalogNavigation from '@/components/ui/CatalogNavigation'
 import { BrandCatalogStructuredData } from '@/components/seo/BrandCatalogStructuredData'
 
 interface BrandCatalogClientProps {
-  brand: MarcaPatineta
+  brand: MarcaPatineta | null
   initialModels: ModeloPatineta[]
+  slug?: string // For client-side fallback
 }
 
 interface CatalogFilters {
@@ -21,9 +22,11 @@ interface CatalogFilters {
   rangeMax: string
 }
 
-export default function BrandCatalogClient({ brand, initialModels }: BrandCatalogClientProps) {
-  const [models] = useState<ModeloPatineta[]>(initialModels)
+export default function BrandCatalogClient({ brand, initialModels, slug }: BrandCatalogClientProps) {
+  const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
+  const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
+  const [loading, setLoading] = useState(!brand && !!slug)
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'speed' | 'range'>('name')
@@ -35,6 +38,31 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
     rangeMin: '',
     rangeMax: ''
   })
+
+  // Client-side data fetching fallback
+  useEffect(() => {
+    if (!currentBrand && slug && loading) {
+      console.log(`[CLIENT] Fetching brand data for slug: ${slug}`)
+      fetch(`/api/brands/${slug}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.brand && data.models) {
+            console.log(`[CLIENT] Successfully fetched brand: ${data.brand.nombre}`)
+            setCurrentBrand(data.brand)
+            setModels(data.models)
+            setFilteredModels(data.models)
+          } else {
+            console.log(`[CLIENT] Brand not found for slug: ${slug}`)
+          }
+        })
+        .catch(error => {
+          console.error(`[CLIENT] Error fetching brand data:`, error)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+  }, [currentBrand, slug, loading])
 
   // Apply filters and search
   useEffect(() => {
@@ -92,9 +120,48 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
 
 
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando información de la marca...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state - brand not found
+  if (!currentBrand) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="mb-6">
+            <div className="mx-auto h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center">
+              <svg className="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.87 0-5.43 1.51-6.84 3.891M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z" />
+              </svg>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Marca no encontrada</h1>
+          <p className="text-gray-600 mb-8">
+            Lo sentimos, no pudimos encontrar información sobre esta marca de patinetas eléctricas.
+          </p>
+          <Link
+            href="/catalogo"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            Ver todas las marcas
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
-      <BrandCatalogStructuredData brand={brand} models={filteredModels} />
+      <BrandCatalogStructuredData brand={currentBrand} models={filteredModels} />
       <div className="min-h-screen bg-gray-50">
         <CatalogNavigation />
         
@@ -123,7 +190,7 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
                     <svg className="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
-                    <span className="ml-4 text-gray-500">{brand.nombre}</span>
+                    <span className="ml-4 text-gray-500">{currentBrand.nombre}</span>
                   </div>
                 </li>
               </ol>
@@ -136,48 +203,48 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-4xl text-center">
               <div className="flex items-center justify-center mb-6">
-                {brand.logo_url ? (
+                {currentBrand.logo_url ? (
                   <img
-                    src={brand.logo_url}
-                    alt={`Logo de ${brand.nombre}`}
+                    src={currentBrand.logo_url}
+                    alt={`Logo de ${currentBrand.nombre}`}
                     className="h-20 w-auto object-contain"
                   />
                 ) : (
                   <div className="h-20 w-20 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-2xl">
-                      {brand.nombre.charAt(0)}
+                      {currentBrand.nombre.charAt(0)}
                     </span>
                   </div>
                 )}
               </div>
-              
+
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
                 Patinetas Eléctricas{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-                  {brand.nombre}
+                  {currentBrand.nombre}
                 </span>
               </h1>
-              
-              {brand.descripcion && (
+
+              {currentBrand.descripcion && (
                 <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-                  {brand.descripcion}
+                  {currentBrand.descripcion}
                 </p>
               )}
               
               <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-500">
                 <span>{models.length} modelo{models.length !== 1 ? 's' : ''} disponible{models.length !== 1 ? 's' : ''}</span>
-                {brand.pais_origen && (
+                {currentBrand.pais_origen && (
                   <>
                     <span>•</span>
-                    <span>Origen: {brand.pais_origen}</span>
+                    <span>Origen: {currentBrand.pais_origen}</span>
                   </>
                 )}
-                {brand.sitio_web && (
+                {currentBrand.sitio_web && (
                   <>
                     <span>•</span>
-                    <a 
-                      href={brand.sitio_web} 
-                      target="_blank" 
+                    <a
+                      href={currentBrand.sitio_web}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:text-primary-dark"
                     >
@@ -204,7 +271,7 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
                   </div>
                   <input
                     type="text"
-                    placeholder={`Buscar modelos de ${brand.nombre}...`}
+                    placeholder={`Buscar modelos de ${currentBrand.nombre}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
@@ -306,7 +373,7 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron modelos</h3>
                 <p className="text-gray-600 mb-4">
-                  No hay modelos de {brand.nombre} que coincidan con tus criterios de búsqueda.
+                  No hay modelos de {currentBrand.nombre} que coincidan con tus criterios de búsqueda.
                 </p>
                 <button
                   onClick={clearFilters}
@@ -327,7 +394,7 @@ export default function BrandCatalogClient({ brand, initialModels }: BrandCatalo
                       {model.imagen_url ? (
                         <img
                           src={model.imagen_url}
-                          alt={`${brand.nombre} ${model.nombre}`}
+                          alt={`${currentBrand.nombre} ${model.nombre}`}
                           className="w-full h-48 object-cover"
                         />
                       ) : (

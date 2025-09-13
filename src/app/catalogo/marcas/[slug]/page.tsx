@@ -105,31 +105,61 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
   const { slug } = await params
   console.log(`[DEBUG] BrandCatalogPage called with slug: ${slug}`)
 
-  const brand = await getBrandBySlug(slug)
+  try {
+    const brand = await getBrandBySlug(slug)
 
-  if (!brand) {
-    console.log(`[DEBUG] Brand not found for slug: ${slug}, calling notFound()`)
-    notFound()
+    if (!brand) {
+      console.log(`[DEBUG] Brand not found for slug: ${slug}, calling notFound()`)
+      notFound()
+    }
+
+    console.log(`[DEBUG] Fetching models for brand: ${brand.nombre} (${brand.id})`)
+    const models = await getModelsByBrand(brand.id)
+    console.log(`[DEBUG] Found ${models.length} models for brand: ${brand.nombre}`)
+
+    return (
+      <BrandCatalogClient
+        brand={brand}
+        initialModels={models}
+      />
+    )
+  } catch (error) {
+    console.error(`[DEBUG] Error in BrandCatalogPage for slug ${slug}:`, error)
+    // Fallback to client-side rendering if server-side fails
+    return (
+      <BrandCatalogClient
+        brand={null}
+        initialModels={[]}
+        slug={slug}
+      />
+    )
   }
-
-  console.log(`[DEBUG] Fetching models for brand: ${brand.nombre} (${brand.id})`)
-  const models = await getModelsByBrand(brand.id)
-  console.log(`[DEBUG] Found ${models.length} models for brand: ${brand.nombre}`)
-
-  return (
-    <BrandCatalogClient
-      brand={brand}
-      initialModels={models}
-    />
-  )
 }
 
-// Force dynamic rendering to avoid build-time issues with Supabase connection
-export const dynamic = 'force-dynamic'
+// Enable dynamic params for brands not in generateStaticParams
+export const dynamicParams = true
 
-// Generate static params for popular brands (optional, for better performance)
+// Generate static params for popular brands to ensure they work in production
 export async function generateStaticParams() {
-  // Return empty array to force dynamic rendering for all routes
-  // This prevents build-time failures when Supabase isn't accessible
-  return []
+  console.log('[DEBUG] generateStaticParams called - generating static paths for known brands')
+
+  // Return predefined slugs for popular brands to ensure they're statically generated
+  const knownBrandSlugs = [
+    'xiaomi',
+    'segway',
+    'ninebot',
+    'kugoo',
+    'dualtron',
+    'zero',
+    'inokim',
+    'kaabo',
+    'vsett',
+    'minimotors'
+  ]
+
+  console.log('[DEBUG] Generating static params for brands:', knownBrandSlugs)
+
+  return knownBrandSlugs.map((slug) => ({
+    slug: slug,
+  }))
 }
