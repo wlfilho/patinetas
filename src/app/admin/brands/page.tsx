@@ -2,25 +2,50 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { brandService, MarcaPatineta } from '@/lib/supabase'
+import { brandService, modelService, MarcaPatineta } from '@/lib/supabase'
 import Link from 'next/link'
+import ToggleSwitch from '@/components/ui/ToggleSwitch'
 
 export default function AdminBrandsPage() {
   const [brands, setBrands] = useState<MarcaPatineta[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [modelCounts, setModelCounts] = useState<Record<string, number>>({})
+
+  const loadModelCounts = useCallback(async (brandIds: string[]) => {
+    try {
+      const counts: Record<string, number> = {}
+
+      // Load model counts for each brand
+      await Promise.all(
+        brandIds.map(async (brandId) => {
+          const models = await modelService.getByBrand(brandId)
+          // Count only active models
+          counts[brandId] = models.filter(model => model.activo).length
+        })
+      )
+
+      setModelCounts(counts)
+    } catch (error) {
+      console.error('Error loading model counts:', error)
+    }
+  }, [])
 
   const loadBrands = useCallback(async () => {
     try {
       setLoading(true)
       const data = await brandService.getAll(true) // Include inactive brands for admin
       setBrands(data)
+
+      // Load model counts for all brands
+      const brandIds = data.map(brand => brand.id)
+      await loadModelCounts(brandIds)
     } catch (error) {
       console.error('Error loading brands:', error)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [loadModelCounts])
 
   useEffect(() => {
     loadBrands()
@@ -179,17 +204,11 @@ export default function AdminBrandsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Marca
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  País de Origen
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Modelos
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha de Creación
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
@@ -201,23 +220,37 @@ export default function AdminBrandsPage() {
                 <tr key={brand.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {brand.logo_url ? (
-                        <Image
-                          src={brand.logo_url}
-                          alt={brand.nombre}
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 object-contain mr-4"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center mr-4">
-                          <span className="text-white font-bold text-sm">
-                            {brand.nombre.charAt(0)}
-                          </span>
-                        </div>
-                      )}
+                      <Link
+                        href={`/admin/brands/${brand.id}`}
+                        className="flex-shrink-0 mr-4 transition-transform hover:scale-105"
+                        title="Editar marca"
+                        aria-label={`Editar marca ${brand.nombre}`}
+                      >
+                        {brand.logo_url ? (
+                          <Image
+                            src={brand.logo_url}
+                            alt={brand.nombre}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 object-contain cursor-pointer"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center cursor-pointer">
+                            <span className="text-white font-bold text-sm">
+                              {brand.nombre.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                      </Link>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{brand.nombre}</div>
+                        <Link
+                          href={`/admin/brands/${brand.id}`}
+                          className="text-sm font-medium text-gray-900 hover:text-primary transition-colors cursor-pointer"
+                          title="Editar marca"
+                          aria-label={`Editar marca ${brand.nombre}`}
+                        >
+                          {brand.nombre}
+                        </Link>
                         {brand.descripcion && (
                           <div className="text-sm text-gray-500 max-w-xs truncate">
                             {brand.descripcion}
@@ -226,48 +259,60 @@ export default function AdminBrandsPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {brand.pais_origen || '-'}
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <ToggleSwitch
+                      checked={brand.activo}
+                      onChange={(checked) => handleToggleStatus(brand.id, brand.activo)}
+                      activeLabel="Activar"
+                      inactiveLabel="Desactivar"
+                      size="md"
+                    />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      brand.activo
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {brand.activo ? 'Activa' : 'Inactiva'}
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">
+                      {modelCounts[brand.id] || 0}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {/* TODO: Add model count */}
-                    -
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {brand.created_at ? new Date(brand.created_at).toLocaleDateString('es-CO') : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                    <Link
-                      href={`/admin/brands/${brand.id}`}
-                      className="text-primary hover:text-primary-dark"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => handleToggleStatus(brand.id, brand.activo)}
-                      className={`${
-                        brand.activo
-                          ? 'text-red-600 hover:text-red-900'
-                          : 'text-green-600 hover:text-green-900'
-                      }`}
-                    >
-                      {brand.activo ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(brand.id, brand.nombre)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Eliminar
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end space-x-3">
+                      {/* Edit Icon */}
+                      <Link
+                        href={`/admin/brands/${brand.id}`}
+                        className="text-primary hover:text-primary-dark transition-colors p-1 rounded-md hover:bg-primary/10"
+                        title="Editar"
+                        aria-label="Editar marca"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </Link>
+
+                      {/* Public View Icon */}
+                      <Link
+                        href={`/catalogo/marcas/${brand.slug || brand.nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded-md hover:bg-blue-50"
+                        title="Ver página pública"
+                        aria-label="Ver página pública de la marca"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </Link>
+
+                      {/* Delete Icon */}
+                      <button
+                        onClick={() => handleDelete(brand.id, brand.nombre)}
+                        className="text-red-600 hover:text-red-900 transition-colors p-1 rounded-md hover:bg-red-50"
+                        title="Eliminar"
+                        aria-label="Eliminar marca"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

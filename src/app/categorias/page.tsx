@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import CategoryCard from '@/components/ui/CategoryCard'
 
-import { generateSlug } from '@/lib/utils'
+import { getCategorySlug } from '@/lib/slugs'
 import { negociosService } from '@/lib/supabase'
 
 interface CategoryWithCount {
@@ -57,7 +57,7 @@ export default function CategoriasPage() {
         name: category.nombre,
         description: categoryDescriptions[category.nombre] || `Servicios relacionados con ${category.nombre.toLowerCase()}.`,
         count: categoryCounts[category.nombre] || 0,
-        slug: generateSlug(category.nombre),
+        slug: getCategorySlug(category.nombre),
         featured: ['Venta de Patinetas Eléctricas', 'Reparación y Mantenimiento', 'Repuestos y Accesorios'].includes(category.nombre),
         icon: category.icono
       }))

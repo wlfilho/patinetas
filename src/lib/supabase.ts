@@ -35,6 +35,8 @@ export interface NegocioDirectorio {
   fecha_creacion: string
   fecha_actualizacion: string
   category_id?: string
+  slug?: string
+  ciudad_slug?: string
 }
 
 // Database types for categorias_patinetas table
@@ -45,6 +47,7 @@ export interface CategoriaPatineta {
   icono?: string
   activo: boolean
   orden: number
+  slug?: string
   created_at?: string
   updated_at?: string
 }
@@ -274,6 +277,46 @@ export const negociosService = {
     }
   },
 
+  // Get business by city and business slugs
+  async getBySlugs(citySlug: string, businessSlug: string) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .eq('ciudad_slug', citySlug)
+        .eq('slug', businessSlug)
+        .eq('activo', true)
+        .single()
+
+      if (error) throw error
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.warn('Supabase error, trying fallback lookup:', error)
+
+      // Fallback: try to find by generated slugs from existing data
+      try {
+        const { generateCitySlug, generateBusinessSlug } = await import('@/lib/slugs')
+        const { data: allData, error: allError } = await supabase
+          .from('diretorio_patinetas')
+          .select('*')
+          .eq('activo', true)
+
+        if (allError) throw allError
+
+        const business = allData.find(b =>
+          generateCitySlug(b.ciudad) === citySlug &&
+          generateBusinessSlug(b.nombre) === businessSlug
+        )
+
+        if (!business) throw new Error('Business not found')
+        return business as NegocioDirectorio
+      } catch (fallbackError) {
+        console.warn('Fallback lookup failed:', fallbackError)
+        throw new Error('Business not found')
+      }
+    }
+  },
+
   // Get unique categories
   async getCategories() {
     try {
@@ -311,6 +354,55 @@ export const negociosService = {
       console.warn('Supabase error, using mock data:', error)
       const cities = [...new Set(mockBusinesses.map(b => b.ciudad))]
       return cities.sort()
+    }
+  },
+
+  // Generate and update slugs for all businesses (migration helper)
+  async generateSlugsForAllBusinesses() {
+    try {
+      const { generateCitySlug, generateUniqueBusinessSlug } = await import('@/lib/slugs')
+
+      // Get all businesses
+      const { data: businesses, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .order('id')
+
+      if (error) throw error
+
+      const updates = []
+
+      for (const business of businesses) {
+        const citySlug = generateCitySlug(business.ciudad)
+        const businessSlug = generateUniqueBusinessSlug(
+          business.nombre,
+          business.ciudad,
+          businesses
+        )
+
+        updates.push({
+          id: business.id,
+          slug: businessSlug,
+          ciudad_slug: citySlug
+        })
+      }
+
+      // Update all businesses with their slugs
+      for (const update of updates) {
+        await supabase
+          .from('diretorio_patinetas')
+          .update({
+            slug: update.slug,
+            ciudad_slug: update.ciudad_slug,
+            fecha_actualizacion: new Date().toISOString()
+          })
+          .eq('id', update.id)
+      }
+
+      return { success: true, updated: updates.length }
+    } catch (error) {
+      console.error('Error generating slugs:', error)
+      throw error
     }
   }
 }
@@ -568,6 +660,87 @@ export const categoryService = {
       return data as CategoriaPatineta
     } catch (error) {
       console.error('Error reactivating category:', error)
+      throw error
+    }
+  },
+
+  // Get category by slug
+  async getBySlug(slug: string) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .select('*')
+        .eq('slug', slug)
+        .eq('activo', true)
+        .single()
+
+      if (error) throw error
+      return data as CategoriaPatineta
+    } catch (error) {
+      console.error('Error fetching category by slug:', error)
+      throw error
+    }
+  },
+
+  // Check if slug is available
+  async isSlugAvailable(slug: string, excludeId?: string) {
+    try {
+      let query = supabase
+        .from('categorias_patinetas')
+        .select('id')
+        .eq('slug', slug)
+
+      if (excludeId) {
+        query = query.neq('id', excludeId)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data.length === 0
+    } catch (error) {
+      console.error('Error checking slug availability:', error)
+      return false
+    }
+  },
+
+  // Generate slugs for all categories that don't have one
+  async generateSlugsForAllCategories() {
+    try {
+      const { generateUniqueCategorySlug } = await import('@/lib/slugs')
+
+      // Get all categories
+      const categories = await this.getAll(true)
+
+      // Filter categories without slugs
+      const categoriesWithoutSlugs = categories.filter(cat => !cat.slug)
+
+      if (categoriesWithoutSlugs.length === 0) {
+        console.log('All categories already have slugs')
+        return { updated: 0, total: categories.length }
+      }
+
+      let updated = 0
+
+      for (const category of categoriesWithoutSlugs) {
+        const slug = generateUniqueCategorySlug(category.nombre, categories)
+
+        const { error } = await supabase
+          .from('categorias_patinetas')
+          .update({ slug })
+          .eq('id', category.id)
+
+        if (error) {
+          console.error(`Error updating slug for category ${category.nombre}:`, error)
+        } else {
+          console.log(`Generated slug for category "${category.nombre}": ${slug}`)
+          updated++
+        }
+      }
+
+      return { updated, total: categories.length }
+    } catch (error) {
+      console.error('Error generating slugs for categories:', error)
       throw error
     }
   },

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { NegocioDirectorio } from '@/types'
 import { formatWhatsAppUrl, getCategoryIcon } from '@/lib/utils'
+import { getCitySlug, generateBusinessSlug } from '@/lib/slugs'
 
 interface BusinessCardProps {
   business: NegocioDirectorio
@@ -11,6 +12,11 @@ interface BusinessCardProps {
 export default function BusinessCard({ business, featured = false }: BusinessCardProps) {
   const categoryIcon = getCategoryIcon(business.categoria)
   const whatsappUrl = business.whatsapp ? formatWhatsAppUrl(business.whatsapp, `Hola, me interesa conocer más sobre ${business.nombre}`) : null
+
+  // Generate SEO-friendly URL
+  const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
+  const businessSlug = business.slug || generateBusinessSlug(business.nombre)
+  const businessUrl = `/negocio/${citySlug}/${businessSlug}`
 
   return (
     <div className={`
@@ -143,7 +149,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
 
           {/* View Details Button */}
           <Link
-            href={`/negocio/${business.id}`}
+            href={businessUrl}
             className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"
           >
             Ver Detalles

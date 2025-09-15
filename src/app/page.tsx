@@ -3,7 +3,7 @@ import SearchBar from '@/components/ui/SearchBar'
 import CategoryCard from '@/components/ui/CategoryCard'
 import BrandCarousel from '@/components/ui/BrandCarousel'
 
-import { generateSlug } from '@/lib/utils'
+import { getCategorySlug } from '@/lib/slugs'
 
 // Mock data for featured categories (in a real app, this would come from the database)
 const featuredCategories = [
@@ -11,28 +11,28 @@ const featuredCategories = [
     name: 'Venta de Patinetas Eléctricas',
     description: 'Encuentra las mejores tiendas para comprar tu patineta eléctrica nueva',
     count: 45,
-    slug: generateSlug('Venta de Patinetas Eléctricas'),
+    slug: getCategorySlug('Venta de Patinetas Eléctricas'),
     featured: true
   },
   {
     name: 'Reparación y Mantenimiento',
     description: 'Servicios técnicos especializados para mantener tu patineta en perfecto estado',
     count: 32,
-    slug: generateSlug('Reparación y Mantenimiento'),
+    slug: getCategorySlug('Reparación y Mantenimiento'),
     featured: true
   },
   {
     name: 'Repuestos y Accesorios',
     description: 'Todo lo que necesitas para personalizar y reparar tu patineta eléctrica',
     count: 28,
-    slug: generateSlug('Repuestos y Accesorios'),
+    slug: getCategorySlug('Repuestos y Accesorios'),
     featured: true
   },
   {
     name: 'Alquiler de Patinetas',
     description: 'Alquila patinetas eléctricas por horas, días o semanas',
     count: 15,
-    slug: generateSlug('Alquiler de Patinetas'),
+    slug: getCategorySlug('Alquiler de Patinetas'),
     featured: false
   }
 ]

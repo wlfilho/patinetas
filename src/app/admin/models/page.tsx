@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { modelService, brandService, ModeloPatineta, MarcaPatineta } from '@/lib/supabase'
 import Link from 'next/link'
+import ToggleSwitch from '@/components/ui/ToggleSwitch'
 
 export default function AdminModelsPage() {
   const [models, setModels] = useState<ModeloPatineta[]>([])
@@ -80,8 +81,7 @@ export default function AdminModelsPage() {
   const stats = {
     total: models.length,
     active: models.filter(m => m.activo).length,
-    inactive: models.filter(m => !m.activo).length,
-    available: models.filter(m => m.disponible_colombia).length
+    inactive: models.filter(m => !m.activo).length
   }
 
   const formatPrice = (min?: number, max?: number) => {
@@ -173,23 +173,6 @@ export default function AdminModelsPage() {
             </div>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Disponibles en Colombia</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.available}</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -245,11 +228,8 @@ export default function AdminModelsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio (COP)
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Disponibilidad
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
@@ -287,23 +267,37 @@ export default function AdminModelsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {model.marca?.logo_url ? (
-                        <Image
-                          src={model.marca.logo_url}
-                          alt={model.marca.nombre}
-                          width={24}
-                          height={24}
-                          className="w-6 h-6 object-contain mr-2"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 bg-gray-200 rounded flex items-center justify-center mr-2">
-                          <span className="text-gray-600 font-bold text-xs">
-                            {model.marca?.nombre.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                      <span className="text-sm text-gray-900">{model.marca?.nombre || '-'}</span>
+                    <div className="flex flex-col items-center space-y-1">
+                      <Link
+                        href={`/admin/brands/${model.marca?.id}`}
+                        className="transition-transform hover:scale-105"
+                        title="Editar marca"
+                        aria-label={`Editar marca ${model.marca?.nombre}`}
+                      >
+                        {model.marca?.logo_url ? (
+                          <Image
+                            src={model.marca.logo_url}
+                            alt={model.marca.nombre}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 object-contain cursor-pointer"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center cursor-pointer">
+                            <span className="text-gray-600 font-bold text-xs">
+                              {model.marca?.nombre.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                      </Link>
+                      <Link
+                        href={`/admin/brands/${model.marca?.id}`}
+                        className="text-xs text-gray-900 hover:text-primary transition-colors cursor-pointer text-center"
+                        title="Editar marca"
+                        aria-label={`Editar marca ${model.marca?.nombre}`}
+                      >
+                        {model.marca?.nombre || '-'}
+                      </Link>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -322,47 +316,55 @@ export default function AdminModelsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatPrice(model.precio_min, model.precio_max)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      model.activo
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {model.activo ? 'Activo' : 'Inactivo'}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <ToggleSwitch
+                      checked={model.activo}
+                      onChange={(checked) => handleToggleStatus(model.id, model.activo)}
+                      activeLabel="Activar"
+                      inactiveLabel="Desactivar"
+                      size="md"
+                    />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      model.disponible_colombia
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {model.disponible_colombia ? 'Disponible' : 'No disponible'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                    <Link
-                      href={`/admin/models/${model.id}`}
-                      className="text-primary hover:text-primary-dark"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => handleToggleStatus(model.id, model.activo)}
-                      className={`${
-                        model.activo
-                          ? 'text-red-600 hover:text-red-900'
-                          : 'text-green-600 hover:text-green-900'
-                      }`}
-                    >
-                      {model.activo ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(model.id, model.nombre)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Eliminar
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end space-x-3">
+                      {/* Edit Icon */}
+                      <Link
+                        href={`/admin/models/${model.id}`}
+                        className="text-primary hover:text-primary-dark transition-colors p-1 rounded-md hover:bg-primary/10"
+                        title="Editar"
+                        aria-label="Editar modelo"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </Link>
+
+                      {/* Public View Icon */}
+                      <Link
+                        href={`/catalogo/marcas/${model.marca?.slug || model.marca?.nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}/${model.slug || model.nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded-md hover:bg-blue-50"
+                        title="Ver página pública"
+                        aria-label="Ver página pública del modelo"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </Link>
+
+                      {/* Delete Icon */}
+                      <button
+                        onClick={() => handleDelete(model.id, model.nombre)}
+                        className="text-red-600 hover:text-red-900 transition-colors p-1 rounded-md hover:bg-red-50"
+                        title="Eliminar"
+                        aria-label="Eliminar modelo"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

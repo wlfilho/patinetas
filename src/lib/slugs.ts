@@ -37,6 +37,22 @@ export function slugToTitle(slug: string): string {
 }
 
 /**
+ * Validate if a string is a valid slug format
+ * @param slug - The slug to validate
+ * @returns True if the slug is valid, false otherwise
+ */
+export function isValidSlug(slug: string): boolean {
+  if (!slug || typeof slug !== 'string') {
+    return false
+  }
+
+  // Check if slug matches the expected pattern: lowercase letters, numbers, and hyphens only
+  // Must not start or end with hyphen, and no consecutive hyphens
+  const slugPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/
+  return slugPattern.test(slug.trim())
+}
+
+/**
  * Generate a brand slug from brand name
  * @param brandName - The brand name
  * @returns A URL-friendly brand slug
@@ -164,11 +180,238 @@ export function parseModelUrlPath(path: string): { brandSlug: string; modelSlug:
   }
 }
 
+
+
 /**
- * Validate if a slug is valid (contains only lowercase letters, numbers, and hyphens)
- * @param slug - The slug to validate
- * @returns True if the slug is valid
+ * Generate a business slug from business name
+ * @param businessName - The business name
+ * @returns A URL-friendly business slug
  */
-export function isValidSlug(slug: string): boolean {
-  return /^[a-z0-9-]+$/.test(slug) && slug.length > 0
+export function generateBusinessSlug(businessName: string): string {
+  return generateSlug(businessName)
+}
+
+/**
+ * Generate a city slug from city name
+ * @param cityName - The city name
+ * @returns A URL-friendly city slug
+ */
+export function generateCitySlug(cityName: string): string {
+  return generateSlug(cityName)
+}
+
+/**
+ * Common Colombian city slug mappings for consistency
+ */
+export const CITY_SLUG_MAPPINGS: Record<string, string> = {
+  'bogotá': 'bogota',
+  'bogota': 'bogota',
+  'medellín': 'medellin',
+  'medellin': 'medellin',
+  'cali': 'cali',
+  'barranquilla': 'barranquilla',
+  'cartagena': 'cartagena',
+  'cúcuta': 'cucuta',
+  'cucuta': 'cucuta',
+  'bucaramanga': 'bucaramanga',
+  'pereira': 'pereira',
+  'santa marta': 'santa-marta',
+  'ibagué': 'ibague',
+  'ibague': 'ibague',
+  'pasto': 'pasto',
+  'manizales': 'manizales',
+  'neiva': 'neiva',
+  'villavicencio': 'villavicencio',
+  'armenia': 'armenia',
+  'valledupar': 'valledupar',
+  'montería': 'monteria',
+  'monteria': 'monteria',
+  'sincelejo': 'sincelejo',
+  'popayán': 'popayan',
+  'popayan': 'popayan',
+  'tunja': 'tunja',
+  'florencia': 'florencia',
+  'riohacha': 'riohacha',
+  'yopal': 'yopal',
+  'mocoa': 'mocoa',
+  'arauca': 'arauca',
+  'mitú': 'mitu',
+  'mitu': 'mitu',
+  'puerto carreño': 'puerto-carreno',
+  'leticia': 'leticia',
+  'san josé del guaviare': 'san-jose-del-guaviare',
+  'inírida': 'inirida',
+  'inirida': 'inirida'
+}
+
+/**
+ * Get the preferred slug for a city name
+ * Uses predefined mappings for consistency, falls back to generated slug
+ * @param cityName - The city name
+ * @returns The preferred slug for the city
+ */
+export function getCitySlug(cityName: string): string {
+  const normalizedName = cityName.toLowerCase().trim()
+
+  // Check if we have a predefined mapping
+  if (CITY_SLUG_MAPPINGS[normalizedName]) {
+    return CITY_SLUG_MAPPINGS[normalizedName]
+  }
+
+  // Fall back to generated slug
+  return generateCitySlug(cityName)
+}
+
+/**
+ * Generate a category slug from category name
+ * @param categoryName - The category name
+ * @returns A URL-friendly category slug
+ */
+export function generateCategorySlug(categoryName: string): string {
+  return generateSlug(categoryName)
+}
+
+/**
+ * Predefined category slug mappings for consistency
+ * Maps category names to their preferred slugs
+ */
+const CATEGORY_SLUG_MAPPINGS: Record<string, string> = {
+  'venta de patinetas eléctricas': 'venta-patinetas-electricas',
+  'reparación y mantenimiento': 'reparacion-mantenimiento',
+  'repuestos y accesorios': 'repuestos-accesorios',
+  'alquiler de patinetas': 'alquiler-patinetas',
+  'servicio técnico': 'servicio-tecnico',
+  'capacitación y cursos': 'capacitacion-cursos',
+  'seguros y garantías': 'seguros-garantias',
+  'financiamiento': 'financiamiento',
+  'importación y distribución': 'importacion-distribucion',
+  'personalización y modificación': 'personalizacion-modificacion'
+}
+
+/**
+ * Get the preferred slug for a category name
+ * Uses predefined mappings for consistency, falls back to generated slug
+ * @param categoryName - The category name
+ * @returns The preferred slug for the category
+ */
+export function getCategorySlug(categoryName: string): string {
+  const normalizedName = categoryName.toLowerCase().trim()
+
+  // Check if we have a predefined mapping
+  if (CATEGORY_SLUG_MAPPINGS[normalizedName]) {
+    return CATEGORY_SLUG_MAPPINGS[normalizedName]
+  }
+
+  // Fall back to generated slug
+  return generateCategorySlug(categoryName)
+}
+
+/**
+ * Generate a unique category slug, handling conflicts
+ * @param categoryName - The category name
+ * @param existingCategories - Array of existing categories to check for conflicts
+ * @returns A unique category slug
+ */
+export function generateUniqueCategorySlug(
+  categoryName: string,
+  existingCategories: Array<{ nombre: string; slug?: string }> = []
+): string {
+  const baseSlug = getCategorySlug(categoryName)
+
+  // Check for conflicts
+  const conflictingCategories = existingCategories.filter(
+    category =>
+      category.slug === baseSlug ||
+      getCategorySlug(category.nombre) === baseSlug
+  )
+
+  if (conflictingCategories.length === 0) {
+    return baseSlug
+  }
+
+  // Generate unique slug with number suffix
+  let counter = 2
+  let uniqueSlug = `${baseSlug}-${counter}`
+
+  while (existingCategories.some(category =>
+    category.slug === uniqueSlug ||
+    getCategorySlug(category.nombre) === uniqueSlug
+  )) {
+    counter++
+    uniqueSlug = `${baseSlug}-${counter}`
+  }
+
+  return uniqueSlug
+}
+
+/**
+ * Generate a unique business slug within a city
+ * @param businessName - The business name
+ * @param cityName - The city name
+ * @param existingBusinesses - Array of existing businesses to check for duplicates
+ * @returns A unique URL-friendly business slug
+ */
+export function generateUniqueBusinessSlug(
+  businessName: string,
+  cityName: string,
+  existingBusinesses: Array<{ nombre: string; ciudad: string; slug?: string }> = []
+): string {
+  const baseSlug = generateBusinessSlug(businessName)
+  const citySlug = getCitySlug(cityName)
+
+  // Check if this slug already exists in the same city
+  const conflictingBusiness = existingBusinesses.find(business =>
+    (business.slug || generateBusinessSlug(business.nombre)) === baseSlug &&
+    getCitySlug(business.ciudad) === citySlug
+  )
+
+  // If there's a conflict, append a number to make it unique
+  if (conflictingBusiness) {
+    let counter = 2
+    let uniqueSlug = `${baseSlug}-${counter}`
+
+    while (existingBusinesses.some(business =>
+      (business.slug || generateBusinessSlug(business.nombre)) === uniqueSlug &&
+      getCitySlug(business.ciudad) === citySlug
+    )) {
+      counter++
+      uniqueSlug = `${baseSlug}-${counter}`
+    }
+
+    return uniqueSlug
+  }
+
+  return baseSlug
+}
+
+/**
+ * Create a full business URL path from city and business names
+ * @param cityName - The city name
+ * @param businessName - The business name
+ * @param existingBusinesses - Array of existing businesses to check for duplicates
+ * @returns The full URL path for the business
+ */
+export function createBusinessUrlPath(
+  cityName: string,
+  businessName: string,
+  existingBusinesses: Array<{ nombre: string; ciudad: string; slug?: string }> = []
+): string {
+  const citySlug = getCitySlug(cityName)
+  const businessSlug = generateUniqueBusinessSlug(businessName, cityName, existingBusinesses)
+  return `/negocio/${citySlug}/${businessSlug}`
+}
+
+/**
+ * Parse a business URL path to extract city and business slugs
+ * @param path - The URL path (e.g., "/negocio/bogota/tienda-patinetas-electricas-centro")
+ * @returns Object with city and business slugs, or null if invalid
+ */
+export function parseBusinessUrlPath(path: string): { citySlug: string; businessSlug: string } | null {
+  const match = path.match(/^\/negocio\/([a-z0-9-]+)\/([a-z0-9-]+)$/)
+  if (!match) return null
+
+  return {
+    citySlug: match[1],
+    businessSlug: match[2]
+  }
 }

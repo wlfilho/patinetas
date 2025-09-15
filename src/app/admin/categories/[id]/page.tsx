@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { categoryService, CategoriaPatineta } from '@/lib/supabase'
+import { generateCategorySlug, isValidSlug } from '@/lib/slugs'
 
 const EMOJI_OPTIONS = [
   '🛴', '🔧', '⚙️', '📅', '🔬', '📦', '🏪', '🚚', '🎓', '🛡️',
@@ -22,12 +23,16 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
   const [initialLoading, setInitialLoading] = useState(true)
   const [businessCount, setBusinessCount] = useState(0)
   const [category, setCategory] = useState<CategoriaPatineta | null>(null)
+  const [slugError, setSlugError] = useState('')
+  const [slugChecking, setSlugChecking] = useState(false)
+  const [autoGenerateSlug, setAutoGenerateSlug] = useState(true)
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
     icono: '🛴',
     activo: true,
-    orden: 0
+    orden: 0,
+    slug: ''
   })
 
   useEffect(() => {
@@ -49,7 +54,8 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
         descripcion: categoryData.descripcion || '',
         icono: categoryData.icono || '🛴',
         activo: categoryData.activo,
-        orden: categoryData.orden
+        orden: categoryData.orden,
+        slug: categoryData.slug || ''
       })
     } catch (error) {
       console.error('Error loading category:', error)
@@ -60,11 +66,46 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
     }
   }
 
+  const validateSlug = async (slug: string) => {
+    if (!slug.trim()) {
+      setSlugError('El slug es requerido')
+      return false
+    }
+
+    if (!isValidSlug(slug)) {
+      setSlugError('El slug debe contener solo letras minúsculas, números y guiones')
+      return false
+    }
+
+    setSlugChecking(true)
+    try {
+      const isAvailable = await categoryService.isSlugAvailable(slug, params.id)
+      if (!isAvailable) {
+        setSlugError('Este slug ya está en uso por otra categoría')
+        return false
+      }
+      setSlugError('')
+      return true
+    } catch (error) {
+      console.error('Error checking slug availability:', error)
+      setSlugError('Error al verificar la disponibilidad del slug')
+      return false
+    } finally {
+      setSlugChecking(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.nombre.trim()) {
       alert('El nombre de la categoría es requerido')
+      return
+    }
+
+    // Validate slug
+    const isSlugValid = await validateSlug(formData.slug)
+    if (!isSlugValid) {
       return
     }
 
@@ -82,11 +123,28 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
-              type === 'number' ? parseInt(value) || 0 : value
-    }))
+
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+                type === 'number' ? parseInt(value) || 0 : value
+      }
+
+      // Auto-generate slug when name changes and auto-generation is enabled
+      if (name === 'nombre' && autoGenerateSlug) {
+        newData.slug = generateCategorySlug(value)
+        setSlugError('')
+      }
+
+      return newData
+    })
+
+    // Clear slug error when manually editing slug
+    if (name === 'slug') {
+      setSlugError('')
+      setAutoGenerateSlug(false)
+    }
   }
 
   const handleDelete = async () => {
@@ -196,6 +254,66 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="Descripción detallada de la categoría..."
             />
+          </div>
+
+          {/* Slug */}
+          <div>
+            <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+              Slug (URL amigable) *
+            </label>
+            <div className="space-y-2">
+              <input
+                type="text"
+                id="slug"
+                name="slug"
+                value={formData.slug}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                  slugError ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="ej: venta-patinetas-electricas"
+                required
+              />
+              {slugError && (
+                <p className="text-sm text-red-600">{slugError}</p>
+              )}
+              {slugChecking && (
+                <p className="text-sm text-blue-600">Verificando disponibilidad...</p>
+              )}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="autoGenerateSlug"
+                  checked={autoGenerateSlug}
+                  onChange={(e) => {
+                    setAutoGenerateSlug(e.target.checked)
+                    if (e.target.checked) {
+                      setFormData(prev => ({
+                        ...prev,
+                        slug: generateCategorySlug(prev.nombre)
+                      }))
+                      setSlugError('')
+                    }
+                  }}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="autoGenerateSlug" className="text-sm text-gray-600">
+                  Generar automáticamente desde el nombre
+                </label>
+              </div>
+              <div className="text-sm text-gray-500">
+                <p className="mb-1">
+                  <strong>Vista previa de la URL:</strong>
+                </p>
+                <p className="font-mono text-xs bg-gray-50 p-2 rounded border">
+                  http://localhost:3000/directorio/{formData.slug || 'slug-de-categoria'}
+                </p>
+                <p className="mt-2 text-xs">
+                  El slug debe contener solo letras minúsculas, números y guiones.
+                  Se usa para crear URLs amigables para SEO.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Icono */}
