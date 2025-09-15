@@ -28,38 +28,43 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
   const searchParams = useSearchParams()
   const querySlug = searchParams.get('slug')
 
-  // Use query parameter slug if available, otherwise use prop slug
-  // Filter out invalid slugs like '[slug]' which might come from URL encoding issues
-  const cleanSlug = slug && slug !== '[slug]' && !slug.includes('%5B') && !slug.includes('[') ? slug : null
-  const effectiveSlug = querySlug || cleanSlug
+  // Extract slug from multiple sources with priority order
+  const getSlugFromUrl = (): string | null => {
+    if (typeof window === 'undefined') return null
+    const pathname = window.location.pathname
+    const pathSlug = pathname.split('/').pop()?.split('?')[0]
+    return pathSlug && pathSlug !== '[slug]' && !pathSlug.includes('%5B') && !pathSlug.includes('[') ? pathSlug : null
+  }
 
-  console.log(`[CLIENT] BrandCatalogClientInner props:`, { brand: brand?.nombre, slug, cleanSlug, querySlug, effectiveSlug })
+  const getSlugFromSearch = (): string | null => {
+    if (typeof window === 'undefined') return null
+    const params = new URLSearchParams(window.location.search)
+    return params.get('slug')
+  }
 
-  // Force use of query parameter if we detect routing issues
-  const urlSlug = typeof window !== 'undefined' ?
-    window.location.pathname.split('/').pop()?.split('?')[0] : null
+  // Priority: useSearchParams > URL search params > URL path > server prop
+  const urlPathSlug = getSlugFromUrl()
+  const urlSearchSlug = getSlugFromSearch()
+  const serverSlug = slug && slug !== '[slug]' && !slug.includes('%5B') && !slug.includes('[') ? slug : null
 
-  // Extract slug from URL search params if available
-  const searchSlug = typeof window !== 'undefined' && window.location.search.includes('slug=') ?
-    new URLSearchParams(window.location.search).get('slug') : null
+  const finalSlug = querySlug || urlSearchSlug || urlPathSlug || serverSlug
 
-  const finalSlug = querySlug || searchSlug ||
-    (urlSlug && urlSlug !== '[slug]' && !urlSlug.includes('%5B') && !urlSlug.includes('[') ? urlSlug : null) ||
-    cleanSlug
+  console.log(`[CLIENT] Slug detection:`, {
+    serverSlug: slug,
+    querySlug,
+    urlSearchSlug,
+    urlPathSlug,
+    finalSlug
+  })
 
-  console.log(`[CLIENT] Final slug to use:`, finalSlug, { querySlug, searchSlug, urlSlug, cleanSlug })
-
-  // Force redirect to query parameter format if we detect routing issues
+  // Auto-redirect if we have a URL path slug but no working final slug
   useEffect(() => {
-    if (typeof window !== 'undefined' && !finalSlug && urlSlug) {
-      const currentUrl = window.location.pathname
-      const brandSlugFromPath = currentUrl.split('/').pop()?.split('?')[0]
-      if (brandSlugFromPath && brandSlugFromPath !== '[slug]' && !brandSlugFromPath.includes('%5B')) {
-        console.log(`[CLIENT] Redirecting to query parameter format for slug: ${brandSlugFromPath}`)
-        window.location.href = `${currentUrl}?slug=${brandSlugFromPath}`
-      }
+    if (typeof window !== 'undefined' && urlPathSlug && !finalSlug) {
+      console.log(`[CLIENT] Auto-redirecting to query parameter format: ${urlPathSlug}`)
+      const currentPath = window.location.pathname
+      window.location.replace(`${currentPath}?slug=${urlPathSlug}`)
     }
-  }, [finalSlug, urlSlug])
+  }, [urlPathSlug, finalSlug])
   const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
   const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
