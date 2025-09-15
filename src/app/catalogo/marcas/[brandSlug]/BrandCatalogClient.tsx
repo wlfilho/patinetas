@@ -37,15 +37,29 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
 
   // Force use of query parameter if we detect routing issues
   const urlSlug = typeof window !== 'undefined' ?
-    window.location.pathname.split('/').pop() : null
+    window.location.pathname.split('/').pop()?.split('?')[0] : null
 
-  const finalSlug = querySlug ||
-    (typeof window !== 'undefined' && window.location.search.includes('slug=') ?
-      new URLSearchParams(window.location.search).get('slug') : null) ||
-    (urlSlug && urlSlug !== '[slug]' && !urlSlug.includes('%5B') ? urlSlug : null) ||
+  // Extract slug from URL search params if available
+  const searchSlug = typeof window !== 'undefined' && window.location.search.includes('slug=') ?
+    new URLSearchParams(window.location.search).get('slug') : null
+
+  const finalSlug = querySlug || searchSlug ||
+    (urlSlug && urlSlug !== '[slug]' && !urlSlug.includes('%5B') && !urlSlug.includes('[') ? urlSlug : null) ||
     cleanSlug
 
-  console.log(`[CLIENT] Final slug to use:`, finalSlug, { querySlug, urlSlug, cleanSlug })
+  console.log(`[CLIENT] Final slug to use:`, finalSlug, { querySlug, searchSlug, urlSlug, cleanSlug })
+
+  // Force redirect to query parameter format if we detect routing issues
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !finalSlug && urlSlug) {
+      const currentUrl = window.location.pathname
+      const brandSlugFromPath = currentUrl.split('/').pop()?.split('?')[0]
+      if (brandSlugFromPath && brandSlugFromPath !== '[slug]' && !brandSlugFromPath.includes('%5B')) {
+        console.log(`[CLIENT] Redirecting to query parameter format for slug: ${brandSlugFromPath}`)
+        window.location.href = `${currentUrl}?slug=${brandSlugFromPath}`
+      }
+    }
+  }, [finalSlug, urlSlug])
   const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
   const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
