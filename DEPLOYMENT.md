@@ -4,7 +4,7 @@
 
 The application requires the following environment variables to be set in your deployment platform:
 
-### Supabase Configuration
+### Supabase Configurationnn
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://vbtxusxqhfoaxmdhuxfw.supabase.co
