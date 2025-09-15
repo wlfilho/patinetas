@@ -30,14 +30,26 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
 
   // Use query parameter slug if available, otherwise use prop slug
   // Filter out invalid slugs like '[slug]' which might come from URL encoding issues
-  const cleanSlug = slug && slug !== '[slug]' && !slug.includes('%5B') ? slug : null
+  const cleanSlug = slug && slug !== '[slug]' && !slug.includes('%5B') && !slug.includes('[') ? slug : null
   const effectiveSlug = querySlug || cleanSlug
 
   console.log(`[CLIENT] BrandCatalogClientInner props:`, { brand: brand?.nombre, slug, cleanSlug, querySlug, effectiveSlug })
+
+  // Force use of query parameter if we detect routing issues
+  const urlSlug = typeof window !== 'undefined' ?
+    window.location.pathname.split('/').pop() : null
+
+  const finalSlug = querySlug ||
+    (typeof window !== 'undefined' && window.location.search.includes('slug=') ?
+      new URLSearchParams(window.location.search).get('slug') : null) ||
+    (urlSlug && urlSlug !== '[slug]' && !urlSlug.includes('%5B') ? urlSlug : null) ||
+    cleanSlug
+
+  console.log(`[CLIENT] Final slug to use:`, finalSlug, { querySlug, urlSlug, cleanSlug })
   const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
   const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
-  const [loading, setLoading] = useState(!brand && !!effectiveSlug)
+  const [loading, setLoading] = useState(!brand && !!finalSlug)
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'speed' | 'range'>('name')
@@ -52,9 +64,9 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
 
   // Client-side data fetching fallback
   useEffect(() => {
-    if (!currentBrand && effectiveSlug && loading) {
-      console.log(`[CLIENT] Fetching brand data for slug: ${effectiveSlug}`)
-      fetch(`/api/brands/${effectiveSlug}`)
+    if (!currentBrand && finalSlug && loading) {
+      console.log(`[CLIENT] Fetching brand data for slug: ${finalSlug}`)
+      fetch(`/api/brands/${finalSlug}`)
         .then(res => res.json())
         .then(data => {
           if (data.brand && data.models) {
@@ -65,12 +77,12 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
 
             // Update URL to clean format if we used query parameter
             if (querySlug && typeof window !== 'undefined') {
-              const newUrl = `/catalogo/marcas/${effectiveSlug}`
+              const newUrl = `/catalogo/marcas/${finalSlug}`
               window.history.replaceState({}, '', newUrl)
               console.log(`[CLIENT] Updated URL to: ${newUrl}`)
             }
           } else {
-            console.log(`[CLIENT] Brand not found for slug: ${effectiveSlug}`)
+            console.log(`[CLIENT] Brand not found for slug: ${finalSlug}`)
           }
         })
         .catch(error => {
@@ -80,7 +92,7 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
           setLoading(false)
         })
     }
-  }, [currentBrand, effectiveSlug, loading, querySlug])
+  }, [currentBrand, finalSlug, loading, querySlug])
 
   // Apply filters and search
   useEffect(() => {
