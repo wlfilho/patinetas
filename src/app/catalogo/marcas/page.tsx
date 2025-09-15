@@ -312,7 +312,7 @@ function BrandsDirectoryPageContent() {
               {filteredAndSortedBrands.map((brand) => (
                 <Link
                   key={brand.id}
-                  href={`/catalogo/marcas?slug=${getBrandSlug(brand.nombre)}`}
+                  href={`/catalogo/marcas/${getBrandSlug(brand.nombre)}`}
                   className="group"
                 >
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group-hover:scale-105">

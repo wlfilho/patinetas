@@ -66,8 +66,8 @@ export default function ModelDetailClient({ model, brandSlug, modelSlug }: Model
                   <svg className="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
-                  <Link 
-                    href={`/catalogo/marcas?slug=${brandSlug}`} 
+                  <Link
+                    href={`/catalogo/marcas/${brandSlug}`}
                     className="ml-4 text-gray-400 hover:text-gray-500"
                   >
                     {model.marca.nombre}
@@ -197,7 +197,7 @@ export default function ModelDetailClient({ model, brandSlug, modelSlug }: Model
                 Ver Tiendas
               </Link>
               <Link
-                href={`/catalogo/marcas?slug=${brandSlug}`}
+                href={`/catalogo/marcas/${brandSlug}`}
                 className="flex-1 bg-white text-gray-900 px-8 py-3 rounded-md font-medium border border-gray-300 hover:bg-gray-50 transition-colors text-center"
               >
                 Ver Más Modelos de {model.marca.nombre}
