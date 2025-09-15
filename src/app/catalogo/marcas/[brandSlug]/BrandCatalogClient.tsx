@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
 import { getBrandSlug, generateUniqueModelSlug } from '@/lib/slugs'
@@ -23,11 +24,16 @@ interface CatalogFilters {
   rangeMax: string
 }
 
-export default function BrandCatalogClient({ brand, initialModels, slug }: BrandCatalogClientProps) {
+function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogClientProps) {
+  const searchParams = useSearchParams()
+  const querySlug = searchParams.get('slug')
+
+  // Use query parameter slug if available, otherwise use prop slug
+  const effectiveSlug = querySlug || slug
   const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
   const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
-  const [loading, setLoading] = useState(!brand && !!slug)
+  const [loading, setLoading] = useState(!brand && !!effectiveSlug)
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'speed' | 'range'>('name')
@@ -42,9 +48,9 @@ export default function BrandCatalogClient({ brand, initialModels, slug }: Brand
 
   // Client-side data fetching fallback
   useEffect(() => {
-    if (!currentBrand && slug && loading) {
-      console.log(`[CLIENT] Fetching brand data for slug: ${slug}`)
-      fetch(`/api/brands/${slug}`)
+    if (!currentBrand && effectiveSlug && loading) {
+      console.log(`[CLIENT] Fetching brand data for slug: ${effectiveSlug}`)
+      fetch(`/api/brands/${effectiveSlug}`)
         .then(res => res.json())
         .then(data => {
           if (data.brand && data.models) {
@@ -52,8 +58,15 @@ export default function BrandCatalogClient({ brand, initialModels, slug }: Brand
             setCurrentBrand(data.brand)
             setModels(data.models)
             setFilteredModels(data.models)
+
+            // Update URL to clean format if we used query parameter
+            if (querySlug && typeof window !== 'undefined') {
+              const newUrl = `/catalogo/marcas/${effectiveSlug}`
+              window.history.replaceState({}, '', newUrl)
+              console.log(`[CLIENT] Updated URL to: ${newUrl}`)
+            }
           } else {
-            console.log(`[CLIENT] Brand not found for slug: ${slug}`)
+            console.log(`[CLIENT] Brand not found for slug: ${effectiveSlug}`)
           }
         })
         .catch(error => {
@@ -63,7 +76,7 @@ export default function BrandCatalogClient({ brand, initialModels, slug }: Brand
           setLoading(false)
         })
     }
-  }, [currentBrand, slug, loading])
+  }, [currentBrand, effectiveSlug, loading, querySlug])
 
   // Apply filters and search
   useEffect(() => {
@@ -469,5 +482,20 @@ export default function BrandCatalogClient({ brand, initialModels, slug }: Brand
         </section>
       </div>
     </>
+  )
+}
+
+export default function BrandCatalogClient(props: BrandCatalogClientProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando catálogo de marca...</p>
+        </div>
+      </div>
+    }>
+      <BrandCatalogClientInner {...props} />
+    </Suspense>
   )
 }

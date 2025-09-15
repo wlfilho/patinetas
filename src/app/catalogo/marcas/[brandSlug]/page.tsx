@@ -110,6 +110,18 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
   const { brandSlug } = await params
   console.log(`[DEBUG] BrandCatalogPage called with brandSlug: ${brandSlug}`)
 
+  // Force client-side fallback in production to avoid server-side issues
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`[DEBUG] Production environment detected, using client-side fallback for brandSlug: ${brandSlug}`)
+    return (
+      <BrandCatalogClient
+        brand={null}
+        initialModels={[]}
+        slug={brandSlug}
+      />
+    )
+  }
+
   try {
     const brand = await getBrandBySlug(brandSlug)
 
