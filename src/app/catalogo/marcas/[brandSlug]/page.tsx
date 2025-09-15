@@ -52,13 +52,27 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
   }
 
 
-  const title = `${brand.nombre} - Patinetas Eléctricas | Catálogo Colombia`
-  const description = `Descubre todos los modelos de patinetas eléctricas ${brand.nombre} disponibles en Colombia. Especificaciones, precios y dónde comprar ${brand.nombre}.`
+  // Use custom SEO data if available, otherwise fall back to defaults
+  const title = brand.seo_title || `${brand.nombre} - Patinetas Eléctricas | Catálogo Colombia`
+  const description = brand.seo_description || `Descubre todos los modelos de patinetas eléctricas ${brand.nombre} disponibles en Colombia. Especificaciones, precios y dónde comprar ${brand.nombre}.`
+  const keywords = brand.seo_keywords || `${brand.nombre}, patinetas eléctricas ${brand.nombre}, scooters eléctricos ${brand.nombre}, ${brand.nombre} Colombia, modelos ${brand.nombre}`
+  const canonicalUrl = brand.seo_canonical_url || `https://patinetaelectrica.com.co/catalogo/marcas/${brandSlug}`
+  const robotsDirective = brand.seo_robots || 'index,follow'
+
+  // OpenGraph data
+  const ogTitle = brand.og_title || `${brand.nombre} - Catálogo de Patinetas Eléctricas`
+  const ogDescription = brand.og_description || brand.descripcion || description
+  const ogImage = brand.og_image_url || brand.logo_url
+
+  // Parse robots directive
+  const robotsParts = robotsDirective.split(',').map(part => part.trim())
+  const shouldIndex = robotsParts.includes('index')
+  const shouldFollow = robotsParts.includes('follow')
 
   return {
     title,
     description,
-    keywords: `${brand.nombre}, patinetas eléctricas ${brand.nombre}, scooters eléctricos ${brand.nombre}, ${brand.nombre} Colombia, modelos ${brand.nombre}`,
+    keywords,
     authors: [{ name: 'Patinetas Eléctricas Colombia' }],
     creator: 'Patinetas Eléctricas Colombia',
     publisher: 'Patinetas Eléctricas Colombia',
@@ -68,36 +82,36 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
       telephone: false,
     },
     alternates: {
-      canonical: `/catalogo/marcas/${brandSlug}`,
+      canonical: canonicalUrl,
     },
     openGraph: {
-      title,
-      description,
-      url: `/catalogo/marcas/${brandSlug}`,
+      title: ogTitle,
+      description: ogDescription,
+      url: canonicalUrl,
       siteName: 'Patinetas Eléctricas Colombia',
       locale: 'es_CO',
       type: 'website',
-      images: brand.logo_url ? [
+      images: ogImage ? [
         {
-          url: brand.logo_url,
-          width: 400,
-          height: 400,
-          alt: `Logo de ${brand.nombre}`,
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${brand.nombre} - Patinetas Eléctricas Colombia`,
         }
       ] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
-      images: brand.logo_url ? [brand.logo_url] : undefined,
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage ? [ogImage] : undefined,
     },
     robots: {
-      index: true,
-      follow: true,
+      index: shouldIndex,
+      follow: shouldFollow,
       googleBot: {
-        index: true,
-        follow: true,
+        index: shouldIndex,
+        follow: shouldFollow,
         'max-video-preview': -1,
         'max-image-preview': 'large',
         'max-snippet': -1,

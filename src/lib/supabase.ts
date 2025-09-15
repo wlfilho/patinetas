@@ -61,6 +61,15 @@ export interface MarcaPatineta {
   orden: number
   created_at?: string
   updated_at?: string
+  // SEO fields
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string
+  seo_canonical_url?: string
+  seo_robots?: string
+  og_title?: string
+  og_description?: string
+  og_image_url?: string
   // Virtual field for slug (generated from nombre)
   slug?: string
 }
@@ -85,6 +94,15 @@ export interface ModeloPatineta {
   orden: number
   created_at?: string
   updated_at?: string
+  // SEO fields
+  seo_title?: string
+  seo_description?: string
+  seo_keywords?: string
+  seo_canonical_url?: string
+  seo_robots?: string
+  og_title?: string
+  og_description?: string
+  og_image_url?: string
   // Joined data from marca
   marca?: MarcaPatineta
   // Virtual field for slug (generated from nombre and marca)
@@ -1089,6 +1107,36 @@ export const uploadService = {
       return publicUrl
     } catch (error) {
       console.error('Error uploading brand logo:', error)
+      throw error
+    }
+  },
+
+  // Upload model image to Supabase Storage
+  async uploadModelImage(file: File, modelId?: string): Promise<string> {
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${modelId || Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `models/${fileName}`
+
+      // Upload file to Supabase Storage
+      const { error } = await supabase.storage
+        .from('model-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) throw error
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('model-images')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Error uploading model image:', error)
       throw error
     }
   },

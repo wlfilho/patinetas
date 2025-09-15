@@ -95,6 +95,15 @@ export function generateModelSlug(modelName: string): string {
 }
 
 /**
+ * Get the preferred slug for a model name
+ * @param modelName - The model name
+ * @returns The preferred slug for the model
+ */
+export function getModelSlug(modelName: string): string {
+  return generateModelSlug(modelName)
+}
+
+/**
  * Generate a unique model slug that includes brand information if needed
  * @param modelName - The model name
  * @param brandName - The brand name (for uniqueness)
