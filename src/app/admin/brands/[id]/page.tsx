@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { brandService, MarcaPatineta, uploadService } from '@/lib/supabase'
 import FileUpload from '@/components/ui/FileUpload'
+import BrandSEOManager, { SEOFormData } from '@/components/admin/BrandSEOManager'
+import SocialMediaPreview from '@/components/admin/SocialMediaPreview'
 import Link from 'next/link'
 
 export default function EditBrandPage() {
@@ -13,6 +15,8 @@ export default function EditBrandPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [brand, setBrand] = useState<MarcaPatineta | null>(null)
+  const [activeTab, setActiveTab] = useState<'basic' | 'seo'>('basic')
+  const [showSEOPreview, setShowSEOPreview] = useState(false)
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -21,6 +25,16 @@ export default function EditBrandPage() {
     sitio_web: '',
     activo: true,
     orden: 0
+  })
+  const [seoData, setSeoData] = useState<SEOFormData>({
+    seo_title: '',
+    seo_description: '',
+    seo_keywords: '',
+    seo_canonical_url: '',
+    seo_robots: 'index,follow',
+    og_title: '',
+    og_description: '',
+    og_image_url: '',
   })
 
   const loadBrand = useCallback(async (id: string) => {
@@ -36,6 +50,18 @@ export default function EditBrandPage() {
         sitio_web: brandData.sitio_web || '',
         activo: brandData.activo,
         orden: brandData.orden
+      })
+
+      // Initialize SEO data
+      setSeoData({
+        seo_title: brandData.seo_title || '',
+        seo_description: brandData.seo_description || '',
+        seo_keywords: brandData.seo_keywords || '',
+        seo_canonical_url: brandData.seo_canonical_url || '',
+        seo_robots: brandData.seo_robots || 'index,follow',
+        og_title: brandData.og_title || '',
+        og_description: brandData.og_description || '',
+        og_image_url: brandData.og_image_url || '',
       })
     } catch (error) {
       console.error('Error loading brand:', error)
@@ -75,6 +101,10 @@ export default function EditBrandPage() {
     alert(`Error al subir la imagen: ${error}`)
   }
 
+  const handleSEODataChange = useCallback((newSeoData: SEOFormData) => {
+    setSeoData(newSeoData)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -98,7 +128,13 @@ export default function EditBrandPage() {
         await uploadService.deleteBrandLogo(brand.logo_url)
       }
 
-      await brandService.update(brand.id, formData)
+      // Combine basic form data with SEO data
+      const updateData = {
+        ...formData,
+        ...seoData
+      }
+
+      await brandService.update(brand.id, updateData)
       router.push('/admin/brands')
     } catch (error) {
       console.error('Error updating brand:', error)
@@ -166,9 +202,48 @@ export default function EditBrandPage() {
         </Link>
       </div>
 
-      {/* Form */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6" aria-label="Tabs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('basic')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'basic'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Información Básica
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('seo')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'seo'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                SEO y Redes Sociales
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6">
+          {activeTab === 'basic' && (
+            <div className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -294,8 +369,38 @@ export default function EditBrandPage() {
               </div>
             </div>
           </div>
+            </div>
+          )}
 
+          {activeTab === 'seo' && (
+            <div className="space-y-6">
+              <BrandSEOManager
+                brand={brand}
+                onSEODataChange={handleSEODataChange}
+              />
 
+              {showSEOPreview && (
+                <SocialMediaPreview
+                  seoData={seoData}
+                  brandName={brand.nombre}
+                />
+              )}
+
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowSEOPreview(!showSEOPreview)}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  {showSEOPreview ? 'Ocultar Vista Previa' : 'Ver Vista Previa Social'}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
