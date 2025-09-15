@@ -81,15 +81,22 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
     rangeMax: ''
   })
 
-  // Client-side data fetching fallback
+  // Force immediate data fetching - bypass routing issues
   useEffect(() => {
-    if (!currentBrand && finalSlug && loading) {
-      console.log(`[CLIENT] Fetching brand data for slug: ${finalSlug}`)
+    // Always try to fetch if we don't have brand data and we have a potential slug
+    if (!currentBrand && finalSlug) {
+      console.log(`[CLIENT] Attempting to fetch brand data for slug: ${finalSlug}`)
+      setLoading(true)
+
       fetch(`/api/brands/${finalSlug}`)
-        .then(res => res.json())
+        .then(res => {
+          console.log(`[CLIENT] API response status: ${res.status}`)
+          return res.json()
+        })
         .then(data => {
+          console.log(`[CLIENT] API response data:`, data)
           if (data.brand && data.models) {
-            console.log(`[CLIENT] Successfully fetched brand: ${data.brand.nombre}`)
+            console.log(`[CLIENT] Successfully loaded brand: ${data.brand.nombre}`)
             setCurrentBrand(data.brand)
             setModels(data.models)
             setFilteredModels(data.models)
@@ -110,8 +117,11 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
         .finally(() => {
           setLoading(false)
         })
+    } else if (!finalSlug) {
+      console.log(`[CLIENT] No valid slug detected, stopping loading`)
+      setLoading(false)
     }
-  }, [currentBrand, finalSlug, loading, querySlug])
+  }, [finalSlug]) // Simplified dependency array
 
   // Apply filters and search
   useEffect(() => {
