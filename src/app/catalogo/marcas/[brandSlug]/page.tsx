@@ -11,6 +11,9 @@ interface BrandCatalogPageProps {
 async function getBrandBySlug(slug: string) {
   try {
     console.log(`[DEBUG] Attempting to fetch brand for slug: ${slug}`)
+    console.log(`[DEBUG] Environment: ${process.env.NODE_ENV}`)
+    console.log(`[DEBUG] Supabase URL exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_URL}`)
+    console.log(`[DEBUG] Supabase Key exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`)
 
     if (!isValidSlug(slug)) {
       console.log(`[DEBUG] Invalid slug: ${slug}`)
@@ -22,6 +25,8 @@ async function getBrandBySlug(slug: string) {
     return brand
   } catch (error) {
     console.error('[ERROR] Error fetching brand by slug:', error)
+    console.error('[ERROR] Error details:', error instanceof Error ? error.message : 'Unknown error')
+    console.error('[ERROR] Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     return null
   }
 }

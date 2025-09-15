@@ -626,12 +626,20 @@ export const brandService = {
   async getBySlug(slug: string) {
     try {
       console.log(`[DEBUG] brandService.getBySlug called with slug: ${slug}`)
+      console.log(`[DEBUG] Environment: ${process.env.NODE_ENV}`)
+      console.log(`[DEBUG] Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30)}...`)
+
       const { getBrandSlug } = await import('./slugs')
 
       // Get all brands and find the one with matching slug
       console.log(`[DEBUG] Fetching all brands...`)
       const brands = await this.getAll()
       console.log(`[DEBUG] Found ${brands.length} brands total`)
+
+      if (brands.length === 0) {
+        console.error('[ERROR] No brands found in database!')
+        throw new Error('No brands found in database')
+      }
 
       // Debug: show all brand slugs
       const brandSlugs = brands.map(b => ({ name: b.nombre, slug: getBrandSlug(b.nombre) }))
@@ -641,12 +649,16 @@ export const brandService = {
       console.log(`[DEBUG] Brand match for slug '${slug}':`, brand ? `${brand.nombre} (${brand.id})` : 'null')
 
       if (!brand) {
+        console.error(`[ERROR] Brand not found for slug: ${slug}`)
+        console.error(`[ERROR] Available slugs: ${brandSlugs.map(b => b.slug).join(', ')}`)
         throw new Error(`Brand not found for slug: ${slug}`)
       }
 
       return brand
     } catch (error) {
       console.error('[ERROR] Error fetching brand by slug:', error)
+      console.error('[ERROR] Error type:', typeof error)
+      console.error('[ERROR] Error message:', error instanceof Error ? error.message : 'Unknown error')
       throw error
     }
   },
