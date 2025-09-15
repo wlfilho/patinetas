@@ -5,7 +5,7 @@ import { isValidSlug } from '@/lib/slugs'
 import BrandCatalogClient from './BrandCatalogClient'
 
 interface BrandCatalogPageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ brandSlug: string }>
 }
 
 async function getBrandBySlug(slug: string) {
@@ -37,8 +37,8 @@ async function getModelsByBrand(brandId: string) {
 }
 
 export async function generateMetadata({ params }: BrandCatalogPageProps): Promise<Metadata> {
-  const { slug } = await params
-  const brand = await getBrandBySlug(slug)
+  const { brandSlug } = await params
+  const brand = await getBrandBySlug(brandSlug)
 
   if (!brand) {
     return {
@@ -63,12 +63,12 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
       telephone: false,
     },
     alternates: {
-      canonical: `/catalogo/marcas/${slug}`,
+      canonical: `/catalogo/marcas/${brandSlug}`,
     },
     openGraph: {
       title,
       description,
-      url: `/catalogo/marcas/${slug}`,
+      url: `/catalogo/marcas/${brandSlug}`,
       siteName: 'Patinetas Eléctricas Colombia',
       locale: 'es_CO',
       type: 'website',
@@ -102,14 +102,14 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
 }
 
 export default async function BrandCatalogPage({ params }: BrandCatalogPageProps) {
-  const { slug } = await params
-  console.log(`[DEBUG] BrandCatalogPage called with slug: ${slug}`)
+  const { brandSlug } = await params
+  console.log(`[DEBUG] BrandCatalogPage called with brandSlug: ${brandSlug}`)
 
   try {
-    const brand = await getBrandBySlug(slug)
+    const brand = await getBrandBySlug(brandSlug)
 
     if (!brand) {
-      console.log(`[DEBUG] Brand not found for slug: ${slug}, calling notFound()`)
+      console.log(`[DEBUG] Brand not found for brandSlug: ${brandSlug}, calling notFound()`)
       notFound()
     }
 
@@ -124,13 +124,13 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
       />
     )
   } catch (error) {
-    console.error(`[DEBUG] Error in BrandCatalogPage for slug ${slug}:`, error)
+    console.error(`[DEBUG] Error in BrandCatalogPage for brandSlug ${brandSlug}:`, error)
     // Fallback to client-side rendering if server-side fails
     return (
       <BrandCatalogClient
         brand={null}
         initialModels={[]}
-        slug={slug}
+        slug={brandSlug}
       />
     )
   }
@@ -164,7 +164,7 @@ export async function generateStaticParams() {
     console.log('[DEBUG] Generating static params for brands:', knownBrandSlugs)
 
     return knownBrandSlugs.map((slug) => ({
-      slug: slug,
+      brandSlug: slug,
     }))
   } catch (error) {
     console.error('[DEBUG] Error in generateStaticParams:', error)

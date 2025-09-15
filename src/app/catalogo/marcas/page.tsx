@@ -9,7 +9,7 @@ import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib
 import { getBrandSlug } from '@/lib/slugs'
 import { BrandsStructuredData } from '@/components/seo/CatalogStructuredData'
 import CatalogNavigation from '@/components/ui/CatalogNavigation'
-import BrandCatalogClient from './[slug]/BrandCatalogClient'
+import BrandCatalogClient from './[brandSlug]/BrandCatalogClient'
 
 interface BrandWithModelCount extends MarcaPatineta {
   modelCount: number
