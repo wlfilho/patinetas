@@ -29,7 +29,11 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
   const querySlug = searchParams.get('slug')
 
   // Use query parameter slug if available, otherwise use prop slug
-  const effectiveSlug = querySlug || slug
+  // Filter out invalid slugs like '[slug]' which might come from URL encoding issues
+  const cleanSlug = slug && slug !== '[slug]' && !slug.includes('%5B') ? slug : null
+  const effectiveSlug = querySlug || cleanSlug
+
+  console.log(`[CLIENT] BrandCatalogClientInner props:`, { brand: brand?.nombre, slug, cleanSlug, querySlug, effectiveSlug })
   const [models, setModels] = useState<ModeloPatineta[]>(initialModels)
   const [filteredModels, setFilteredModels] = useState<ModeloPatineta[]>(initialModels)
   const [currentBrand, setCurrentBrand] = useState<MarcaPatineta | null>(brand)
