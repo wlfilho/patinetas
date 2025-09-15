@@ -28,7 +28,13 @@ export interface NegocioDirectorio {
   whatsapp?: string
   instagram?: string
   facebook?: string
+  youtube?: string
+  tiktok?: string
+  google_business_url?: string
+  numero_resenhas?: number
+  valoracion?: number
   horario_atencion?: string
+  horarios_funcionamento?: string
   servicios?: string[]
   imagen_url?: string
   activo: boolean
@@ -1310,6 +1316,40 @@ export const uploadService = {
       return publicUrl
     } catch (error) {
       console.error('Error uploading model image:', error)
+      throw error
+    }
+  },
+
+  // Upload business image to Supabase Storage
+  async uploadBusinessImage(file: File, businessId?: string): Promise<string> {
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `business-${businessId || Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+
+      // Use brand-logos bucket with businesses folder for now
+      // TODO: Create dedicated business-images bucket later
+      const bucketName = 'brand-logos'
+      const filePath = `businesses/${fileName}`
+
+      // Upload file to Supabase Storage
+      const { error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) throw error
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Error uploading business image:', error)
       throw error
     }
   },

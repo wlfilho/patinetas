@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { negociosService } from '@/lib/supabase'
 import { formatPhoneNumber, formatWhatsAppUrl, formatBusinessHours, getCategoryIcon, generateMetaTitle, generateMetaDescription } from '@/lib/utils'
+import { markdownToPlainText } from '@/lib/markdown'
 import { BusinessStructuredData } from '@/components/seo/StructuredData'
+import MarkdownContent from '@/components/ui/MarkdownContent'
 
 interface PageProps {
   params: Promise<{ cidade: string; 'nome-do-negocio': string }>
@@ -16,14 +18,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   try {
     const business = await negociosService.getBySlugs(cidade, nomeDoNegocio)
-    
+
+    // Convert markdown description to plain text for SEO
+    const plainDescription = business.descripcion
+      ? markdownToPlainText(business.descripcion, 160)
+      : `${business.nombre} en ${business.ciudad}, ${business.departamento}. ${business.categoria} especializada en patinetas eléctricas.`
+
     return {
       title: generateMetaTitle(`${business.nombre} - ${business.categoria} en ${business.ciudad}`),
-      description: generateMetaDescription(business.descripcion || `${business.nombre} en ${business.ciudad}, ${business.departamento}. ${business.categoria} especializada en patinetas eléctricas.`),
+      description: generateMetaDescription(plainDescription),
       keywords: `${business.nombre}, ${business.categoria}, patinetas eléctricas, ${business.ciudad}, ${business.departamento}, Colombia`,
       openGraph: {
         title: `${business.nombre} - ${business.categoria}`,
-        description: business.descripcion || `${business.nombre} en ${business.ciudad}, ${business.departamento}`,
+        description: plainDescription,
         images: business.imagen_url ? [business.imagen_url] : [],
         type: 'website',
         locale: 'es_CO',
@@ -31,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       twitter: {
         card: 'summary_large_image',
         title: `${business.nombre} - ${business.categoria}`,
-        description: business.descripcion || `${business.nombre} en ${business.ciudad}, ${business.departamento}`,
+        description: plainDescription,
         images: business.imagen_url ? [business.imagen_url] : [],
       },
     }
@@ -123,9 +130,10 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Acerca de {business.nombre}
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {business.descripcion}
-                </p>
+                <MarkdownContent
+                  content={business.descripcion}
+                  className="text-gray-700 leading-relaxed"
+                />
               </div>
             )}
 

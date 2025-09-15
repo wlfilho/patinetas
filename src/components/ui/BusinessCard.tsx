@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { NegocioDirectorio } from '@/types'
 import { formatWhatsAppUrl, getCategoryIcon } from '@/lib/utils'
 import { getCitySlug, generateBusinessSlug } from '@/lib/slugs'
+import { markdownToPlainText } from '@/lib/markdown'
 
 interface BusinessCardProps {
   business: NegocioDirectorio
@@ -64,7 +65,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
 
         {business.descripcion && (
           <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-            {business.descripcion}
+            {markdownToPlainText(business.descripcion, 150)}
           </p>
         )}
 
