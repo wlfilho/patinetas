@@ -87,6 +87,8 @@ export interface ModeloPatineta {
   updated_at?: string
   // Joined data from marca
   marca?: MarcaPatineta
+  // Virtual field for slug (generated from nombre and marca)
+  slug?: string
 }
 
 // Mock data for development
@@ -780,7 +782,17 @@ export const modelService = {
       const { data, error } = await query
 
       if (error) throw error
-      return data as ModeloPatineta[]
+
+      // Add slug to each model
+      const { generateUniqueModelSlug } = await import('./slugs')
+      const modelsWithSlugs = (data as ModeloPatineta[]).map(model => {
+        if (model.marca) {
+          model.slug = generateUniqueModelSlug(model.nombre, model.marca.nombre, data)
+        }
+        return model
+      })
+
+      return modelsWithSlugs
     } catch (error) {
       console.error('Error fetching models:', error)
       return []
@@ -826,9 +838,53 @@ export const modelService = {
         .single()
 
       if (error) throw error
-      return data as ModeloPatineta
+
+      // Add slug to the model
+      const model = data as ModeloPatineta
+      if (model.marca) {
+        const { generateUniqueModelSlug } = await import('./slugs')
+        const allModels = await this.getAll(true) // Get all models for uniqueness check
+        model.slug = generateUniqueModelSlug(model.nombre, model.marca.nombre, allModels)
+      }
+
+      return model
     } catch (error) {
       console.error('Error fetching model:', error)
+      throw error
+    }
+  },
+
+  // Get model by brand and model slugs
+  async getByBrandAndModelSlugs(brandSlug: string, modelSlug: string) {
+    try {
+      console.log(`[DEBUG] modelService.getByBrandAndModelSlugs called with brandSlug: ${brandSlug}, modelSlug: ${modelSlug}`)
+
+      // Get all models to find the one matching both brand and model slugs
+      const allModels = await this.getAll()
+      console.log(`[DEBUG] Found ${allModels.length} models total`)
+
+      // Import slug functions
+      const { getBrandSlug, generateUniqueModelSlug } = await import('./slugs')
+
+      // Find model that matches both brand and model slugs
+      const matchingModel = allModels.find(model => {
+        if (!model.marca) return false
+
+        const modelBrandSlug = getBrandSlug(model.marca.nombre)
+        const modelModelSlug = generateUniqueModelSlug(model.nombre, model.marca.nombre, allModels)
+
+        return modelBrandSlug === brandSlug && modelModelSlug === modelSlug
+      })
+
+      if (matchingModel) {
+        console.log(`[DEBUG] Model match found: ${matchingModel.nombre} by ${matchingModel.marca?.nombre}`)
+      } else {
+        console.log(`[DEBUG] No model found for brandSlug: ${brandSlug}, modelSlug: ${modelSlug}`)
+      }
+
+      return matchingModel || null
+    } catch (error) {
+      console.error('[ERROR] Error fetching model by slugs:', error)
       throw error
     }
   },

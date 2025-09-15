@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
+import { getBrandSlug, generateUniqueModelSlug } from '@/lib/slugs'
 import { CatalogStructuredData } from '@/components/seo/CatalogStructuredData'
 import CatalogNavigation from '@/components/ui/CatalogNavigation'
 import Link from 'next/link'
@@ -414,7 +415,7 @@ function CatalogoPageContent() {
 
                     {/* Action Button */}
                     <Link
-                      href={`/modelo/${model.id}`}
+                      href={model.marca ? `/catalogo/marcas/${getBrandSlug(model.marca.nombre)}/${generateUniqueModelSlug(model.nombre, model.marca.nombre, filteredModels)}` : `/modelo/${model.id}`}
                       className="block w-full text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium"
                     >
                       Ver Detalles

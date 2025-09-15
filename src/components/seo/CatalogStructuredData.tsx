@@ -1,5 +1,5 @@
 import { ModeloPatineta, MarcaPatineta } from '@/lib/supabase'
-import { getBrandSlug } from '@/lib/slugs'
+import { getBrandSlug, generateUniqueModelSlug } from '@/lib/slugs'
 
 interface CatalogStructuredDataProps {
   models?: ModeloPatineta[]
@@ -29,7 +29,7 @@ export function CatalogStructuredData({ models = [] }: CatalogStructuredDataProp
           "url": model.marca?.sitio_web
         },
         "image": model.imagen_url,
-        "url": `${baseUrl}/modelo/${model.id}`,
+        "url": model.marca ? `${baseUrl}/catalogo/marcas/${getBrandSlug(model.marca.nombre)}/${generateUniqueModelSlug(model.nombre, model.marca.nombre, models)}` : `${baseUrl}/modelo/${model.id}`,
         ...(model.precio_min && model.precio_max && {
           "offers": {
             "@type": "AggregateOffer",
@@ -91,7 +91,7 @@ export function ModelStructuredData({ model }: ModelStructuredDataProps) {
       "url": model.marca?.sitio_web
     },
     "image": model.imagen_url,
-    "url": `${baseUrl}/modelo/${model.id}`,
+    "url": model.marca ? `${baseUrl}/catalogo/marcas/${getBrandSlug(model.marca.nombre)}/${generateUniqueModelSlug(model.nombre, model.marca.nombre, [])}` : `${baseUrl}/modelo/${model.id}`,
     ...(model.precio_min && model.precio_max && {
       "offers": {
         "@type": "AggregateOffer",

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { MarcaPatineta, ModeloPatineta } from '@/lib/supabase'
+import { getBrandSlug, generateUniqueModelSlug } from '@/lib/slugs'
 
 import CatalogNavigation from '@/components/ui/CatalogNavigation'
 import { BrandCatalogStructuredData } from '@/components/seo/BrandCatalogStructuredData'
@@ -454,7 +455,7 @@ export default function BrandCatalogClient({ brand, initialModels, slug }: Brand
 
                       {/* Action Button */}
                       <Link
-                        href={`/modelo/${model.id}`}
+                        href={`/catalogo/marcas/${getBrandSlug(currentBrand.nombre)}/${generateUniqueModelSlug(model.nombre, currentBrand.nombre, filteredModels)}`}
                         className="block w-full text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium"
                       >
                         Ver Detalles

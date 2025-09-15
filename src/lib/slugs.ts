@@ -11,6 +11,9 @@ export function generateSlug(text: string): string {
   return text
     .toLowerCase()
     .trim()
+    // Normalize Spanish characters
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
     // Replace spaces and underscores with hyphens
     .replace(/[\s_]+/g, '-')
     // Remove special characters except hyphens
@@ -80,6 +83,76 @@ export function getBrandSlug(brandName: string): string {
   
   // Fall back to generated slug
   return generateBrandSlug(brandName)
+}
+
+/**
+ * Generate a model slug from model name
+ * @param modelName - The model name
+ * @returns A URL-friendly model slug
+ */
+export function generateModelSlug(modelName: string): string {
+  return generateSlug(modelName)
+}
+
+/**
+ * Generate a unique model slug that includes brand information if needed
+ * @param modelName - The model name
+ * @param brandName - The brand name (for uniqueness)
+ * @param existingModels - Array of existing models to check for duplicates
+ * @returns A unique URL-friendly model slug
+ */
+export function generateUniqueModelSlug(
+  modelName: string,
+  brandName: string,
+  existingModels: Array<{ nombre: string; marca?: { nombre: string } }> = []
+): string {
+  const baseSlug = generateModelSlug(modelName)
+
+  // Check if this slug already exists for a different brand
+  const conflictingModel = existingModels.find(model =>
+    generateModelSlug(model.nombre) === baseSlug &&
+    model.marca?.nombre !== brandName
+  )
+
+  // If there's a conflict, append brand name to make it unique
+  if (conflictingModel) {
+    const brandSlug = generateBrandSlug(brandName)
+    return `${baseSlug}-${brandSlug}`
+  }
+
+  return baseSlug
+}
+
+/**
+ * Create a full model URL path from brand and model names
+ * @param brandName - The brand name
+ * @param modelName - The model name
+ * @param existingModels - Array of existing models to check for duplicates
+ * @returns The full URL path for the model
+ */
+export function createModelUrlPath(
+  brandName: string,
+  modelName: string,
+  existingModels: Array<{ nombre: string; marca?: { nombre: string } }> = []
+): string {
+  const brandSlug = getBrandSlug(brandName)
+  const modelSlug = generateUniqueModelSlug(modelName, brandName, existingModels)
+  return `/catalogo/marcas/${brandSlug}/${modelSlug}`
+}
+
+/**
+ * Parse a model URL path to extract brand and model slugs
+ * @param path - The URL path (e.g., "/catalogo/marcas/xiaomi/mi-electric-scooter-pro-2")
+ * @returns Object with brand and model slugs, or null if invalid
+ */
+export function parseModelUrlPath(path: string): { brandSlug: string; modelSlug: string } | null {
+  const match = path.match(/^\/catalogo\/marcas\/([a-z0-9-]+)\/([a-z0-9-]+)$/)
+  if (!match) return null
+
+  return {
+    brandSlug: match[1],
+    modelSlug: match[2]
+  }
 }
 
 /**
