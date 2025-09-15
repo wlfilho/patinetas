@@ -602,6 +602,7 @@ export default function EditModelPage({ params }: EditModelPageProps) {
               )}
             </button>
           </div>
+          </div>
         </form>
       </div>
     </div>

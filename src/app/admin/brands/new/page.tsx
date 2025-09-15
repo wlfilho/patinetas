@@ -328,7 +328,7 @@ export default function NewBrandPage() {
                     </svg>
                   </div>
                   <p className="text-gray-500">
-                    Completa el nombre de la marca en la pestaña "Información Básica" para configurar el SEO
+                    Completa el nombre de la marca en la pestaña &quot;Información Básica&quot; para configurar el SEO
                   </p>
                 </div>
               )}

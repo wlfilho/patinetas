@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: `${business.nombre} - ${business.categoria}`,
         description: business.descripcion || `${business.nombre} en ${business.ciudad}, ${business.departamento}`,
         images: business.imagen_url ? [business.imagen_url] : [],
-        type: 'business.business',
+        type: 'website',
         locale: 'es_CO',
       },
       twitter: {

@@ -62,13 +62,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     // If not found by slug, try to find by generated slug from name
     if (!category) {
       const allCategories = await categoryService.getAll(false) // Only active categories
-      category = allCategories.find(cat => 
+      const foundCategory = allCategories.find(cat =>
         getCategorySlug(cat.nombre) === categorySlug
-      ) || null
-    }
-    
-    if (!category) {
-      notFound()
+      )
+
+      if (!foundCategory) {
+        notFound()
+      }
+
+      category = foundCategory
     }
 
     // Get businesses for this category

@@ -180,7 +180,7 @@ export default function BrandSEOManager({ brand, onSEODataChange }: BrandSEOMana
               placeholder="palabra1, palabra2, palabra3"
             />
             <p className="text-xs text-gray-500 mt-1">
-              💡 Incluye términos relevantes como "{brand.nombre}", "patinetas eléctricas", "Colombia"
+              💡 Incluye términos relevantes como &quot;{brand.nombre}&quot;, &quot;patinetas eléctricas&quot;, &quot;Colombia&quot;
             </p>
           </div>
 
