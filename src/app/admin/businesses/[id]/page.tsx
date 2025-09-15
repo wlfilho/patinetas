@@ -388,7 +388,7 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
               </label>
               <BusinessImageUpload
                 currentImageUrl={formData.imagen_url}
-                businessId={businessId}
+                businessId={businessId || undefined}
                 onUploadComplete={handleImageUpload}
                 onUploadError={(error) => {
                   console.error('Error uploading business image:', error)
