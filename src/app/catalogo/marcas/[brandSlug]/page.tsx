@@ -110,47 +110,19 @@ export default async function BrandCatalogPage({ params }: BrandCatalogPageProps
   const { brandSlug } = await params
   console.log(`[DEBUG] BrandCatalogPage called with brandSlug: ${brandSlug}`)
 
-  // Force client-side fallback in production to avoid server-side issues
-  if (process.env.NODE_ENV === 'production') {
-    console.log(`[DEBUG] Production environment detected, using client-side fallback for brandSlug: ${brandSlug}`)
-    return (
-      <BrandCatalogClient
-        brand={null}
-        initialModels={[]}
-        slug={brandSlug}
-      />
-    )
-  }
+  // Always use client-side fallback to ensure consistent behavior
+  // The client will detect query parameters and load data via API
+  console.log(`[DEBUG] Using client-side fallback for brandSlug: ${brandSlug}`)
+  return (
+    <BrandCatalogClient
+      brand={null}
+      initialModels={[]}
+      slug={brandSlug}
+    />
+  )
 
-  try {
-    const brand = await getBrandBySlug(brandSlug)
-
-    if (!brand) {
-      console.log(`[DEBUG] Brand not found for brandSlug: ${brandSlug}, calling notFound()`)
-      notFound()
-    }
-
-    console.log(`[DEBUG] Fetching models for brand: ${brand.nombre} (${brand.id})`)
-    const models = await getModelsByBrand(brand.id)
-    console.log(`[DEBUG] Found ${models.length} models for brand: ${brand.nombre}`)
-
-    return (
-      <BrandCatalogClient
-        brand={brand}
-        initialModels={models}
-      />
-    )
-  } catch (error) {
-    console.error(`[DEBUG] Error in BrandCatalogPage for brandSlug ${brandSlug}:`, error)
-    // Fallback to client-side rendering if server-side fails
-    return (
-      <BrandCatalogClient
-        brand={null}
-        initialModels={[]}
-        slug={brandSlug}
-      />
-    )
-  }
+  // Removed server-side logic - all data loading now happens client-side
+  // This ensures consistent behavior across all environments
 }
 
 // Enable dynamic params for brands not in generateStaticParams
