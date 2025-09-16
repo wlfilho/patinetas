@@ -77,11 +77,7 @@ export default function SocialShareButtons({
               className="flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-full transition-all duration-200"
               title={`Compartir en ${link.name}`}
             >
-              <div className="w-4 h-4">
-                {React.cloneElement(link.icon as React.ReactElement, {
-                  className: "w-4 h-4"
-                })}
-              </div>
+              {link.icon}
             </a>
           ))}
         </div>
