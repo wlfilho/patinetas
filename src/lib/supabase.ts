@@ -36,6 +36,7 @@ export interface NegocioDirectorio {
   horario_atencion?: string
   horarios_funcionamento?: string
   servicios?: string[]
+  outras_especialidades?: string[]
   imagen_url?: string
   activo: boolean
   fecha_creacion: string

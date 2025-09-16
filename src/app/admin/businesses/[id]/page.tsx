@@ -8,6 +8,7 @@ import { NegocioDirectorio } from '@/lib/supabase'
 import { DEPARTAMENTOS_COLOMBIA, CIUDADES_POR_DEPARTAMENTO } from '@/types'
 import BusinessHoursManager from '@/components/admin/BusinessHoursManager'
 import BusinessImageUpload from '@/components/admin/BusinessImageUpload'
+import { ESPECIALIDADES_NEGOCIO } from '@/constants/especialidades'
 
 
 
@@ -47,6 +48,7 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
     horario_atencion: '',
     horarios_funcionamento: '',
     servicios: [] as string[],
+    outras_especialidades: [] as string[],
     imagen_url: '',
     activo: true
   })
@@ -126,6 +128,7 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
         horario_atencion: foundBusiness.horario_atencion || '',
         horarios_funcionamento: foundBusiness.horarios_funcionamento || '',
         servicios: foundBusiness.servicios || [],
+        outras_especialidades: foundBusiness.outras_especialidades || [],
         imagen_url: foundBusiness.imagen_url || '',
         activo: foundBusiness.activo
       })
@@ -179,6 +182,18 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
     }))
   }
 
+  const toggleEspecialidade = (especialidadeId: string) => {
+    setFormData(prev => {
+      const isSelected = prev.outras_especialidades.includes(especialidadeId)
+      return {
+        ...prev,
+        outras_especialidades: isSelected
+          ? prev.outras_especialidades.filter(e => e !== especialidadeId)
+          : [...prev.outras_especialidades, especialidadeId]
+      }
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -227,6 +242,7 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
         horario_atencion: formData.horario_atencion.trim() || undefined,
         horarios_funcionamento: formData.horarios_funcionamento || undefined,
         servicios: formData.servicios,
+        outras_especialidades: formData.outras_especialidades,
         imagen_url: formData.imagen_url.trim() || undefined,
         activo: formData.activo
       }
@@ -677,6 +693,81 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
               value={formData.horarios_funcionamento}
               onChange={handleBusinessHoursChange}
             />
+          </div>
+        </div>
+
+        {/* Outras Especialidades Section */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+            <h2 className="text-lg font-semibold text-gray-900">Otras Especialidades</h2>
+            <p className="text-sm text-gray-600 mt-1">Selecciona las especialidades adicionales que ofrece el negocio</p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ESPECIALIDADES_NEGOCIO.map((especialidade) => {
+                const isSelected = formData.outras_especialidades.includes(especialidade.id)
+                return (
+                  <div
+                    key={especialidade.id}
+                    className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                      isSelected
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                    onClick={() => {
+                      toggleEspecialidade(especialidade.id)
+                    }}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        <span className="text-2xl">{especialidade.icono}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation()
+                              toggleEspecialidade(especialidade.id)
+                            }}
+                            className="rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <h3 className="text-sm font-medium text-gray-900 leading-tight">
+                            {especialidade.nombre}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                          {especialidade.descripcion}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {formData.outras_especialidades.length > 0 && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-900 mb-2">
+                  Especialidades Seleccionadas ({formData.outras_especialidades.length})
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {formData.outras_especialidades.map((especialidadeId) => {
+                    const especialidade = ESPECIALIDADES_NEGOCIO.find(e => e.id === especialidadeId)
+                    if (!especialidade) return null
+                    return (
+                      <span
+                        key={especialidadeId}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-white"
+                      >
+                        {especialidade.icono} {especialidade.nombre}
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

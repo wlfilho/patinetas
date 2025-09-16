@@ -15,6 +15,7 @@ import BusinessMap from '@/components/ui/BusinessMap'
 import BusinessHoursGrid from '@/components/ui/BusinessHoursGrid'
 import BusinessStatus from '@/components/ui/BusinessStatus'
 import Breadcrumb, { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
+import { ESPECIALIDADES_NEGOCIO } from '@/constants/especialidades'
 
 interface PageProps {
   params: Promise<{ cidade: string; 'nome-do-negocio': string }>
@@ -220,6 +221,37 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                       <span className="text-gray-700">{servicio}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Outras Especialidades */}
+            {business.outras_especialidades && business.outras_especialidades.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Otras Especialidades
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {business.outras_especialidades.map((especialidadeId, index) => {
+                    const especialidade = ESPECIALIDADES_NEGOCIO.find(e => e.id === especialidadeId)
+                    if (!especialidade) return null
+
+                    return (
+                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="flex-shrink-0">
+                          <span className="text-xl">{especialidade.icono}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-gray-900 leading-tight">
+                            {especialidade.nombre}
+                          </h3>
+                          <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                            {especialidade.descripcion}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
