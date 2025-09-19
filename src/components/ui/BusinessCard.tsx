@@ -20,13 +20,16 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
   const businessUrl = `/negocio/${citySlug}/${businessSlug}`
 
   return (
-    <div className={`
-      bg-white rounded-xl border border-gray-200 overflow-hidden
-      hover:shadow-lg hover:border-primary/30 transition-all duration-300
-      ${featured ? 'ring-2 ring-primary/20 shadow-md' : ''}
-    `}>
+    <Link
+      href={businessUrl}
+      className={`
+        block bg-white rounded-xl border border-gray-200 overflow-hidden
+        hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer
+        ${featured ? 'ring-2 ring-primary/20 shadow-md' : ''}
+      `}
+    >
       {/* Business Image */}
-      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
         {business.imagen_url ? (
           <Image
             src={business.imagen_url}
@@ -110,6 +113,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
                 title="Contactar por WhatsApp"
               >
@@ -123,6 +127,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             {business.telefono && (
               <a
                 href={`tel:${business.telefono}`}
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
                 title="Llamar"
               >
@@ -138,6 +143,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
                 href={business.sitio_web}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center justify-center w-8 h-8 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors"
                 title="Visitar sitio web"
               >
@@ -147,16 +153,8 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
               </a>
             )}
           </div>
-
-          {/* View Details Button */}
-          <Link
-            href={businessUrl}
-            className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"
-          >
-            Ver Detalles
-          </Link>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
