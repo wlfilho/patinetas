@@ -191,16 +191,23 @@ export const negociosService = {
   // Get all active businesses
   async getAll() {
     try {
+      console.log('🔍 Querying Supabase table: diretorio_patinetas')
       const { data, error } = await supabase
         .from('diretorio_patinetas')
         .select('*')
         .eq('activo', true)
         .order('nombre')
 
+      console.log('📡 Supabase response:', {
+        data: data?.length || 0,
+        error: error?.message || 'none',
+        firstRecord: data?.[0]?.nombre || 'none'
+      })
+
       if (error) throw error
       return data as NegocioDirectorio[]
     } catch (error) {
-      console.warn('Supabase error, using mock data:', error)
+      console.warn('❌ Supabase error, using mock data:', error)
       return mockBusinesses
     }
   },
