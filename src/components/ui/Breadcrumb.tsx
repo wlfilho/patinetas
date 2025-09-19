@@ -29,8 +29,8 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
           </Link>
         </li>
 
-        {/* Breadcrumb items - exclude the last item (current page) */}
-        {items.slice(0, -1).map((item, index) => (
+        {/* Breadcrumb items - show all items including current page */}
+        {items.map((item, index) => (
           <li key={index}>
             <div className="flex items-center">
               <svg className="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
                   {item.label}
                 </Link>
               ) : (
-                <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                <span className="ml-1 text-sm font-medium text-gray-600 md:ml-2" aria-current="page">
                   {item.label}
                 </span>
               )}

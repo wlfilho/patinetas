@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import SearchBar from '@/components/ui/SearchBar'
 import BusinessCard from '@/components/ui/BusinessCard'
+import { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
 import { NegocioDirectorio } from '@/types'
 import { negociosService } from '@/lib/supabase'
 
@@ -120,8 +122,40 @@ function DirectorioContent() {
     )
   }
 
+  // Breadcrumb structured data
+  const breadcrumbStructuredData = [
+    { name: 'Inicio', url: process.env.NEXT_PUBLIC_SITE_URL || 'https://staging.motoselectricas.com.co' },
+    { name: 'Directorio', url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://staging.motoselectricas.com.co'}/directorio` }
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb Structured Data */}
+      <BreadcrumbStructuredData items={breadcrumbStructuredData} />
+
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-4">
+          <nav className="flex" aria-label="Breadcrumb">
+            <ol className="flex items-center space-x-4">
+              <li>
+                <Link href="/" className="text-sm font-medium text-gray-400 hover:text-gray-500">
+                  Inicio
+                </Link>
+              </li>
+              <li>
+                <div className="flex items-center">
+                  <svg className="h-5 w-5 flex-shrink-0 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="ml-4 text-sm font-medium text-gray-500">Directorio</span>
+                </div>
+              </li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
