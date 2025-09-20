@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+
 import Image from 'next/image'
 import { NegocioDirectorio } from '@/types'
 import { formatWhatsAppUrl, getCategoryIcon } from '@/lib/utils'

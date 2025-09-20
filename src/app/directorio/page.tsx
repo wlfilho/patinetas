@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SearchBar from '@/components/ui/SearchBar'
@@ -8,8 +8,8 @@ import BusinessCard from '@/components/ui/BusinessCard'
 import Pagination from '@/components/ui/Pagination'
 import ItemsPerPageSelector from '@/components/ui/ItemsPerPageSelector'
 import PaginationInfo from '@/components/ui/PaginationInfo'
-import { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
-import { usePagination } from '@/hooks/usePagination'
+// import { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
+
 import { NegocioDirectorio } from '@/types'
 import { negociosService } from '@/lib/supabase'
 
@@ -28,21 +28,21 @@ const mockBusinesses: NegocioDirectorio[] = Array.from({ length: 14 }, (_, i) =>
   whatsapp: `+57 300 000 00${i.toString().padStart(2, '0')}`,
   instagram: `https://instagram.com/business${i + 1}`,
   facebook: `https://facebook.com/business${i + 1}`,
-  horario_atencion: null,
+  horario_atencion: undefined,
   servicios: [],
-  imagen_url: null,
+  imagen_url: undefined,
   activo: true,
   fecha_creacion: new Date().toISOString(),
   fecha_actualizacion: new Date().toISOString(),
-  category_id: null,
-  slug: null,
-  ciudad_slug: null,
+  category_id: undefined,
+  slug: undefined,
+  ciudad_slug: undefined,
   youtube: '',
   tiktok: '',
   google_business_url: '',
   numero_resenhas: Math.floor(Math.random() * 50) + 1,
   valoracion: Math.round((Math.random() * 4 + 1) * 10) / 10,
-  horarios_funcionamento: null,
+  horarios_funcionamento: undefined,
   outras_especialidades: []
 }))
 
@@ -268,7 +268,7 @@ function DirectorioContent({ initialPage = 1 }: DirectorioContentProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb Structured Data */}
-      <BreadcrumbStructuredData items={breadcrumbStructuredData} />
+      {/* <BreadcrumbStructuredData items={breadcrumbStructuredData} /> */}
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
@@ -496,6 +496,9 @@ interface DirectorioPageProps {
 }
 
 export default function DirectorioPage({ initialPage = 1 }: DirectorioPageProps = {}) {
-
-  return <DirectorioContent initialPage={initialPage} />
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <DirectorioContent initialPage={initialPage} />
+    </Suspense>
+  )
 }

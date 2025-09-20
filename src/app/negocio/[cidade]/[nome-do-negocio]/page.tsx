@@ -14,7 +14,7 @@ import NavigationButtons from '@/components/ui/NavigationButtons'
 import BusinessMap from '@/components/ui/BusinessMap'
 import BusinessHoursGrid from '@/components/ui/BusinessHoursGrid'
 import BusinessStatus from '@/components/ui/BusinessStatus'
-import Breadcrumb, { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
+// import Breadcrumb, { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
 import { ESPECIALIDADES_NEGOCIO } from '@/constants/especialidades'
 
 interface PageProps {
@@ -95,7 +95,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
   return (
     <>
       <BusinessStructuredData business={business} />
-      <BreadcrumbStructuredData items={breadcrumbStructuredData} />
+      {/* <BreadcrumbStructuredData items={breadcrumbStructuredData} /> */}
       <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="relative min-h-64 sm:min-h-80 lg:min-h-96 xl:min-h-[28rem] pt-4 sm:pt-6 lg:pt-8 bg-gradient-to-br from-primary/20 via-secondary/20 to-primary/30">
@@ -175,7 +175,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
       {/* Breadcrumb Navigation */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Breadcrumb items={breadcrumbItems} />
+          {/* <Breadcrumb items={breadcrumbItems} /> */}
         </div>
       </div>
 
