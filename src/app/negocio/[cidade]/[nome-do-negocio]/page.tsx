@@ -380,7 +380,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                   <a
                     href={business.sitio_web}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="nofollow noopener noreferrer"
                     className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -400,7 +400,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                       <a
                         href={business.instagram.startsWith('http') ? business.instagram : `https://instagram.com/${business.instagram.replace('@', '')}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition-all duration-200"
                         title="Instagram"
                       >
@@ -414,7 +414,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                       <a
                         href={business.facebook.startsWith('http') ? business.facebook : `https://facebook.com/${business.facebook}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
                         title="Facebook"
                       >
@@ -428,7 +428,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                       <a
                         href={business.youtube.startsWith('http') ? business.youtube : `https://youtube.com/${business.youtube}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200"
                         title="YouTube"
                       >
@@ -442,7 +442,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                       <a
                         href={business.tiktok.startsWith('http') ? business.tiktok : `https://tiktok.com/${business.tiktok.replace('@', '')}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 hover:text-gray-800 transition-all duration-200"
                         title="TikTok"
                       >

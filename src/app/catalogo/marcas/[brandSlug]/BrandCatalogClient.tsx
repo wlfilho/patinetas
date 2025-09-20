@@ -304,7 +304,7 @@ function BrandCatalogClientInner({ brand, initialModels, slug }: BrandCatalogCli
                     <a
                       href={currentBrand.sitio_web}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="text-primary hover:text-primary-dark"
                     >
                       Sitio web oficial
