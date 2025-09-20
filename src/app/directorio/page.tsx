@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, Suspense, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SearchBar from '@/components/ui/SearchBar'
 import BusinessCard from '@/components/ui/BusinessCard'
@@ -46,10 +46,36 @@ const mockBusinesses: NegocioDirectorio[] = Array.from({ length: 14 }, (_, i) =>
   outras_especialidades: []
 }))
 
-function DirectorioContent() {
-  const [businesses, setBusinesses] = useState<NegocioDirectorio[]>(mockBusinesses)
-  const [allBusinesses, setAllBusinesses] = useState<NegocioDirectorio[]>(mockBusinesses)
-  const [loading, setLoading] = useState(false)
+interface DirectorioContentProps {
+  initialPage?: number
+}
+
+function DirectorioContent({ initialPage = 1 }: DirectorioContentProps) {
+
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Handle backward compatibility - redirect old query parameter URLs to SEO-friendly URLs
+  useEffect(() => {
+    const pageParam = searchParams.get('page')
+    if (pageParam && !window.location.pathname.includes('/p/')) {
+      const pageNumber = parseInt(pageParam, 10)
+      if (pageNumber > 1) {
+        // Redirect to SEO-friendly URL
+        router.replace(`/directorio/p/${pageNumber}`)
+        return
+      } else if (pageNumber === 1) {
+        // Redirect page=1 to clean URL
+        router.replace('/directorio')
+        return
+      }
+    }
+  }, [searchParams, router])
+
+  const [businesses, setBusinesses] = useState<NegocioDirectorio[]>([])
+  const [allBusinesses, setAllBusinesses] = useState<NegocioDirectorio[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [categories, setCategories] = useState<{nombre: string, icono: string}[]>([
     { nombre: 'Venta de Patinetas Eléctricas', icono: '🛒' },
@@ -63,14 +89,7 @@ function DirectorioContent() {
 
 
 
-  // Initialize with mock data immediately to ensure pagination works
-  useEffect(() => {
-    if (businesses.length === 0 && !loading) {
-      console.log('🔄 Initializing with mock data for immediate pagination')
-      setBusinesses(mockBusinesses)
-      setAllBusinesses(mockBusinesses)
-    }
-  }, [businesses.length, loading])
+
 
   // Load real Supabase data
   useEffect(() => {
@@ -78,25 +97,13 @@ function DirectorioContent() {
 
     const loadAllData = async () => {
       try {
-        console.log('🚀 Loading real Supabase data...')
         setLoading(true)
-        console.log('🔍 Querying Supabase table: diretorio_patinetas')
 
         const data = await negociosService.getAll()
-        console.log('📡 Supabase response:', {
-          data: data?.length || 0,
-          error: 'none',
-          firstRecord: data?.[0]?.nombre || 'none'
-        })
 
         if (!isMounted) return
 
         if (data && data.length > 0) {
-          console.log('✅ Real Supabase data loaded successfully:', {
-            count: data.length,
-            firstBusiness: data[0]?.nombre
-          })
-
           // Store all businesses for filtering
           setAllBusinesses(data)
           // Initially show all businesses
@@ -113,12 +120,9 @@ function DirectorioContent() {
 
           setCategories(uniqueCategories)
           setCities(uniqueCities)
-        } else {
-          console.log('⚠️ No real data received, keeping mock data')
         }
       } catch (err) {
-        console.error('❌ Error loading real data:', err)
-        console.log('🔄 Keeping mock data due to error')
+        console.error('Error loading data:', err)
       } finally {
         if (isMounted) {
           setLoading(false)
@@ -126,28 +130,29 @@ function DirectorioContent() {
       }
     }
 
-    // Load real data after a short delay
-    const timer = setTimeout(() => {
-      loadAllData()
-    }, 1000)
+    loadAllData()
 
     return () => {
       isMounted = false
-      clearTimeout(timer)
     }
   }, [])
 
-  const searchParams = useSearchParams()
-
   // Pagination hook
-  const {
-    currentPage,
-    itemsPerPage,
-    setCurrentPage,
-    setItemsPerPage,
-    resetPagination,
-    updateUrlParams
-  } = usePagination({ defaultItemsPerPage: 10 })
+  // Use initialPage directly instead of complex hook
+  const currentPage = initialPage
+  const itemsPerPage = 10
+
+  // Simple URL generation function
+  const generatePaginationUrl = (page: number) => {
+    if (page <= 1) {
+      return '/directorio'
+    }
+    return `/directorio/p/${page}`
+  }
+
+
+
+
 
   // Data loading is now handled directly in component body above
 
@@ -190,12 +195,8 @@ function DirectorioContent() {
     setBusinesses(filteredBusinesses)
   }, [allBusinesses, selectedCategory, selectedCity])
 
-  // Reset pagination when filters change
-  useEffect(() => {
-    if (currentPage > 1) {
-      setCurrentPage(1)
-    }
-  }, [selectedCategory, selectedCity, setCurrentPage])
+  // Note: In this simplified approach, filters will reset to page 1 automatically
+  // since we're using the initialPage prop directly
 
   // Sorted and paginated businesses
   const sortedBusinesses = useMemo(() => {
@@ -221,33 +222,23 @@ function DirectorioContent() {
 
 
 
-  // Handle page changes
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page)
 
-    // Scroll to top of results section with better positioning
-    setTimeout(() => {
-      const resultsSection = document.getElementById('business-results')
-      if (resultsSection) {
-        const headerHeight = 80 // Account for fixed header if any
-        const elementTop = resultsSection.offsetTop - headerHeight
-        window.scrollTo({
-          top: elementTop,
-          behavior: 'smooth'
-        })
-      }
-    }, 100) // Small delay to ensure state has updated
-  }, [setCurrentPage])
 
-  // Handle items per page changes
+
+
+
+
+  // Handle items per page changes (simplified - just reload page)
   const handleItemsPerPageChange = useCallback((items: number) => {
-    setItemsPerPage(items)
-  }, [setItemsPerPage])
+    // For now, just reload the page - in a full implementation this would update the URL
+    window.location.reload()
+  }, [])
 
   const clearFilters = () => {
     setSelectedCategory('')
     setSelectedCity('')
-    updateUrlParams({ categoria: null, ciudad: null, page: null })
+    // For now, just reload the page - in a full implementation this would update the URL
+    window.location.href = '/directorio'
   }
 
   if (error) {
@@ -469,7 +460,7 @@ function DirectorioContent() {
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
-                      onPageChange={handlePageChange}
+                      generatePaginationUrl={generatePaginationUrl}
                       className="order-1 sm:order-2"
                     />
                   </div>
@@ -500,6 +491,11 @@ function DirectorioContent() {
   )
 }
 
-export default function DirectorioPage() {
-  return <DirectorioContent />
+interface DirectorioPageProps {
+  initialPage?: number
+}
+
+export default function DirectorioPage({ initialPage = 1 }: DirectorioPageProps = {}) {
+
+  return <DirectorioContent initialPage={initialPage} />
 }

@@ -1,20 +1,29 @@
 'use client'
 
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
 interface PaginationProps {
   currentPage: number
   totalPages: number
-  onPageChange: (page: number) => void
+  generatePaginationUrl: (page: number) => string
   className?: string
 }
 
 export default function Pagination({
   currentPage,
   totalPages,
-  onPageChange,
+  generatePaginationUrl,
   className = ''
 }: PaginationProps) {
+  const router = useRouter()
   // Don't render pagination if there's only one page or no pages
   if (totalPages <= 1) return null
+
+  // Don't render if generatePaginationUrl is not available yet
+  if (!generatePaginationUrl || typeof generatePaginationUrl !== 'function') {
+    return null
+  }
 
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -62,24 +71,28 @@ export default function Pagination({
   return (
     <nav className={`flex items-center justify-center space-x-1 ${className}`} aria-label="Pagination">
       {/* Previous Button */}
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`
-          relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg
-          transition-colors duration-200
-          ${currentPage === 1
-            ? 'text-gray-300 cursor-not-allowed bg-gray-50'
-            : 'text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300'
-          }
-        `}
-        aria-label="Página anterior"
-      >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        <span className="ml-1 hidden sm:inline">Anterior</span>
-      </button>
+      {currentPage === 1 ? (
+        <span
+          className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-300 cursor-not-allowed bg-gray-50"
+          aria-label="Página anterior"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="ml-1 hidden sm:inline">Anterior</span>
+        </span>
+      ) : (
+        <button
+          onClick={() => router.push(generatePaginationUrl(currentPage - 1))}
+          className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300 transition-colors duration-200"
+          aria-label="Página anterior"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="ml-1 hidden sm:inline">Anterior</span>
+        </button>
+      )}
 
       {/* Page Numbers */}
       <div className="flex items-center space-x-1">
@@ -98,20 +111,21 @@ export default function Pagination({
           const pageNumber = page as number
           const isCurrentPage = pageNumber === currentPage
 
-          return (
+          return isCurrentPage ? (
+            <span
+              key={pageNumber}
+              className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-primary text-white shadow-sm"
+              aria-label={`Página ${pageNumber}`}
+              aria-current="page"
+            >
+              {pageNumber}
+            </span>
+          ) : (
             <button
               key={pageNumber}
-              onClick={() => onPageChange(pageNumber)}
-              className={`
-                relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg
-                transition-colors duration-200
-                ${isCurrentPage
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300'
-                }
-              `}
+              onClick={() => router.push(generatePaginationUrl(pageNumber))}
+              className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300 transition-colors duration-200"
               aria-label={`Página ${pageNumber}`}
-              aria-current={isCurrentPage ? 'page' : undefined}
             >
               {pageNumber}
             </button>
@@ -120,24 +134,28 @@ export default function Pagination({
       </div>
 
       {/* Next Button */}
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`
-          relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg
-          transition-colors duration-200
-          ${currentPage === totalPages
-            ? 'text-gray-300 cursor-not-allowed bg-gray-50'
-            : 'text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300'
-          }
-        `}
-        aria-label="Página siguiente"
-      >
-        <span className="mr-1 hidden sm:inline">Siguiente</span>
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      {currentPage === totalPages ? (
+        <span
+          className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-300 cursor-not-allowed bg-gray-50"
+          aria-label="Página siguiente"
+        >
+          <span className="mr-1 hidden sm:inline">Siguiente</span>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      ) : (
+        <button
+          onClick={() => router.push(generatePaginationUrl(currentPage + 1))}
+          className="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-500 bg-white hover:bg-gray-50 hover:text-primary border border-gray-300 transition-colors duration-200"
+          aria-label="Página siguiente"
+        >
+          <span className="mr-1 hidden sm:inline">Siguiente</span>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
     </nav>
   )
 }
