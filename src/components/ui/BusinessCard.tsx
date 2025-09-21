@@ -24,9 +24,9 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
   return (
     <div
       className={`
-        block bg-white rounded-xl border border-gray-200 overflow-hidden
+        block bg-white rounded-xl border overflow-hidden
         hover:shadow-lg hover:border-primary/30 transition-all duration-300
-        ${featured ? 'ring-2 ring-primary/20 shadow-md' : ''}
+        ${featured ? 'border-gray-300 shadow-sm' : 'border-gray-200'}
       `}
     >
       {/* Business Image */}
@@ -45,14 +45,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             </div>
           </div>
         )}
-        
-        {/* Featured Badge */}
-        {featured && (
-          <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-white text-xs font-medium rounded-full">
-            Destacado
-          </div>
-        )}
-        
+
         {/* Category Badge */}
         <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full">
           {business.categoria}

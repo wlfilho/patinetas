@@ -2,6 +2,8 @@ import Link from 'next/link'
 import SearchBar from '@/components/ui/SearchBar'
 import CategoryCard from '@/components/ui/CategoryCard'
 import BrandCarousel from '@/components/ui/BrandCarousel'
+import FeaturedBusinesses from '@/components/ui/FeaturedBusinesses'
+import FAQ from '@/components/ui/FAQ'
 
 import { getCategorySlug } from '@/lib/slugs'
 
@@ -163,6 +165,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Featured Businesses Section */}
+      <FeaturedBusinesses limit={8} />
+
       {/* CTA Section */}
       <section className="bg-primary">
         <div className="mx-auto max-w-7xl py-16 px-6 sm:py-24 lg:px-8">
@@ -190,6 +195,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <FAQ />
     </div>
   )
 }

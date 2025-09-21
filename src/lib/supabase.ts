@@ -135,6 +135,8 @@ const mockBusinesses: NegocioDirectorio[] = [
     whatsapp: "3001234567",
     instagram: "@electroscooter_bogota",
     facebook: "ElectroScooterBogota",
+    numero_resenhas: 47,
+    valoracion: 4.8,
     horario_atencion: "Lunes a Viernes 8:00 - 18:00, Sábados 9:00 - 16:00",
     servicios: ["Venta", "Reparación", "Mantenimiento", "Garantía"],
     imagen_url: undefined,
@@ -156,6 +158,8 @@ const mockBusinesses: NegocioDirectorio[] = [
     whatsapp: "3009876543",
     instagram: "@patinetas_medellin",
     facebook: "PatinetesMedellin",
+    numero_resenhas: 32,
+    valoracion: 4.5,
     horario_atencion: "Lunes a Sábado 9:00 - 19:00",
     servicios: ["Venta", "Asesoría", "Entrega a domicilio"],
     imagen_url: undefined,
@@ -177,8 +181,79 @@ const mockBusinesses: NegocioDirectorio[] = [
     whatsapp: "3015555555",
     instagram: undefined,
     facebook: undefined,
+    numero_resenhas: 28,
+    valoracion: 4.7,
     horario_atencion: "Lunes a Viernes 8:00 - 17:00",
     servicios: ["Reparación", "Mantenimiento", "Diagnóstico", "Repuestos"],
+    imagen_url: undefined,
+    activo: true,
+    fecha_creacion: "2024-01-01T00:00:00Z",
+    fecha_actualizacion: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 4,
+    nombre: "Repuestos Eléctricos Cali",
+    descripcion: "Todo en repuestos y accesorios para patinetas eléctricas. Baterías, llantas, frenos y más.",
+    categoria: "Repuestos y Accesorios",
+    telefono: "3027777777",
+    email: "ventas@repuestos-cali.co",
+    direccion: "Avenida 6N #28-45",
+    ciudad: "Cali",
+    departamento: "Valle del Cauca",
+    sitio_web: "https://repuestos-cali.co",
+    whatsapp: "3027777777",
+    instagram: "@repuestos_cali",
+    facebook: "RepuestosElectricosCali",
+    numero_resenhas: 41,
+    valoracion: 4.6,
+    horario_atencion: "Lunes a Viernes 8:30 - 18:30, Sábados 9:00 - 15:00",
+    servicios: ["Repuestos", "Accesorios", "Instalación", "Asesoría técnica"],
+    imagen_url: undefined,
+    activo: true,
+    fecha_creacion: "2024-01-01T00:00:00Z",
+    fecha_actualizacion: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 5,
+    nombre: "EcoMovilidad Barranquilla",
+    descripcion: "Alquiler de patinetas eléctricas por horas y días. Ideal para turismo y movilidad urbana.",
+    categoria: "Alquiler de Patinetas",
+    telefono: "3058888888",
+    email: "alquiler@ecomovilidad.co",
+    direccion: "Carrera 53 #72-15",
+    ciudad: "Barranquilla",
+    departamento: "Atlántico",
+    sitio_web: "https://ecomovilidad.co",
+    whatsapp: "3058888888",
+    instagram: "@ecomovilidad_baq",
+    facebook: "EcoMovilidadBarranquilla",
+    numero_resenhas: 23,
+    valoracion: 4.3,
+    horario_atencion: "Todos los días 7:00 - 20:00",
+    servicios: ["Alquiler por horas", "Alquiler por días", "Tours guiados", "Entrega a domicilio"],
+    imagen_url: undefined,
+    activo: true,
+    fecha_creacion: "2024-01-01T00:00:00Z",
+    fecha_actualizacion: "2024-01-01T00:00:00Z"
+  },
+  {
+    id: 6,
+    nombre: "Scooter Pro Cartagena",
+    descripcion: "Venta de patinetas eléctricas premium y servicio técnico especializado en la ciudad heroica.",
+    categoria: "Venta de Patinetas Eléctricas",
+    telefono: "3069999999",
+    email: "info@scooterpro.co",
+    direccion: "Avenida Pedro de Heredia #31-45",
+    ciudad: "Cartagena",
+    departamento: "Bolívar",
+    sitio_web: "https://scooterpro.co",
+    whatsapp: "3069999999",
+    instagram: "@scooterpro_ctg",
+    facebook: "ScooterProCartagena",
+    numero_resenhas: 35,
+    valoracion: 4.9,
+    horario_atencion: "Lunes a Sábado 8:00 - 19:00",
+    servicios: ["Venta", "Servicio técnico", "Garantía extendida", "Financiación"],
     imagen_url: undefined,
     activo: true,
     fecha_creacion: "2024-01-01T00:00:00Z",
@@ -328,6 +403,37 @@ export const negociosService = {
         console.warn('Fallback lookup failed:', fallbackError)
         throw new Error('Business not found')
       }
+    }
+  },
+
+  // Get featured businesses for home page
+  async getFeatured(limit = 8) {
+    try {
+      console.log('🔍 Querying featured businesses from Supabase')
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .eq('activo', true)
+        .order('valoracion', { ascending: false })
+        .order('numero_resenhas', { ascending: false })
+        .order('fecha_creacion', { ascending: false })
+        .limit(limit)
+
+      console.log('📡 Featured businesses response:', {
+        data: data?.length || 0,
+        error: error?.message || 'none',
+        firstRecord: data?.[0]?.nombre || 'none'
+      })
+
+      if (error) throw error
+      return data as NegocioDirectorio[]
+    } catch (error) {
+      console.warn('❌ Supabase error for featured businesses, using mock data:', error)
+      // Return a curated selection of mock businesses for featured display
+      return mockBusinesses
+        .filter(b => b.valoracion && b.valoracion >= 4.0) // Only high-rated businesses
+        .sort((a, b) => (b.valoracion || 0) - (a.valoracion || 0))
+        .slice(0, limit)
     }
   },
 
