@@ -6,7 +6,7 @@ interface CatalogStructuredDataProps {
 }
 
 export function CatalogStructuredData({ models = [] }: CatalogStructuredDataProps) {
-  const baseUrl = 'https://staging.motoselectricas.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
 
   // Product catalog structured data
   const catalogData = {
@@ -78,7 +78,7 @@ interface ModelStructuredDataProps {
 }
 
 export function ModelStructuredData({ model }: ModelStructuredDataProps) {
-  const baseUrl = 'https://staging.motoselectricas.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
 
   const productData = {
     "@context": "https://schema.org",

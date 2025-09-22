@@ -27,14 +27,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://staging.motoselectricas.com.co'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Patinetas Eléctricas Colombia | Directorio Completo",
     description: "Encuentra las mejores patinetas eléctricas en Colombia. Directorio completo de tiendas, servicios técnicos, repuestos y más.",
-    url: 'https://staging.motoselectricas.com.co',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co',
     siteName: 'Patinetas Eléctricas Colombia',
     locale: 'es_CO',
     type: 'website',

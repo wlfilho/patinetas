@@ -4,11 +4,15 @@
 
 The application requires the following environment variables to be set in your deployment platform:
 
-### Supabase Configurationnn
+### Required Environment Variables
 
 ```bash
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://vbtxusxqhfoaxmdhuxfw.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidHh1c3hxaGZvYXhtZGh1eGZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTI0NjksImV4cCI6MjA3MzI4ODQ2OX0.iAFtYaca_MboBh3WMDKkj0d4kV2B2y1jw0x_l1_NMu4
+
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=https://patinetaelectrica.com.co
 ```
 
 ## Vercel Deployment
@@ -30,8 +34,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 vercel env add NEXT_PUBLIC_SUPABASE_URL
 # Enter: https://vbtxusxqhfoaxmdhuxfw.supabase.co
 
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY  
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 # Enter: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidHh1c3hxaGZvYXhtZGh1eGZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTI0NjksImV4cCI6MjA3MzI4ODQ2OX0.iAFtYaca_MboBh3WMDKkj0d4kV2B2y1jw0x_l1_NMu4
+
+vercel env add NEXT_PUBLIC_SITE_URL
+# Enter: https://patinetaelectrica.com.co
 
 # Deploy
 vercel --prod
@@ -51,6 +58,7 @@ vercel --prod
 ```bash
 heroku config:set NEXT_PUBLIC_SUPABASE_URL=https://vbtxusxqhfoaxmdhuxfw.supabase.co
 heroku config:set NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidHh1c3hxaGZvYXhtZGh1eGZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTI0NjksImV4cCI6MjA3MzI4ODQ2OX0.iAFtYaca_MboBh3WMDKkj0d4kV2B2y1jw0x_l1_NMu4
+heroku config:set NEXT_PUBLIC_SITE_URL=https://patinetaelectrica.com.co
 ```
 
 ## Verification

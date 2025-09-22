@@ -91,7 +91,7 @@ export function DirectoryStructuredData({ businesses, category, city }: Director
         "@type": "LocalBusiness",
         "name": business.nombre,
         "description": business.descripcion,
-        "url": `https://staging.motoselectricas.com.co/negocio/${business.id}`,
+        "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`,
         "telephone": business.telefono,
         "address": {
           "@type": "PostalAddress",
@@ -118,12 +118,12 @@ export function WebsiteStructuredData() {
     "@type": "WebSite",
     "name": "Patinetas Eléctricas Colombia",
     "description": "El directorio más completo de patinetas eléctricas en Colombia. Encuentra tiendas, servicios técnicos, repuestos y más.",
-    "url": "https://staging.motoselectricas.com.co",
+    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://patinetaelectrica.com.co",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://staging.motoselectricas.com.co/buscar?q={search_term_string}"
+        "urlTemplate": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/buscar?q={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
@@ -148,8 +148,8 @@ export function OrganizationStructuredData() {
     "@type": "Organization",
     "name": "Patinetas Eléctricas Colombia",
     "description": "Directorio especializado en patinetas eléctricas y movilidad sostenible en Colombia",
-    "url": "https://staging.motoselectricas.com.co",
-    "logo": "https://staging.motoselectricas.com.co/logo.png",
+    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://patinetaelectrica.com.co",
+    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/logo.png`,
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+57-300-123-4567",

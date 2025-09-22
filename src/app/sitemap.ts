@@ -4,7 +4,8 @@ import { generateSlug } from '@/lib/utils'
 
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://staging.motoselectricas.com.co'
+  // Use environment variable for base URL, fallback to production URL
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   
   // Static pages
   const staticPages = [
