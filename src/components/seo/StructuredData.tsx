@@ -9,7 +9,7 @@ export function BusinessStructuredData({ business }: BusinessStructuredDataProps
   // Generate new URL structure: /[categoria]/[cidade]/[negocio]
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   const categorySlug = getCategorySlug(business.categoria)
-  const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+  const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
   const businessSlug = business.slug || business.id.toString()
   const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
 
@@ -97,7 +97,7 @@ export function DirectoryStructuredData({ businesses, category, city }: Director
     "itemListElement": businesses.slice(0, 20).map((business, index) => {
       // Generate new URL structure: /[categoria]/[cidade]/[negocio]
       const categorySlug = getCategorySlug(business.categoria)
-      const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+      const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
       const businessSlug = business.slug || business.id.toString()
       const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
 

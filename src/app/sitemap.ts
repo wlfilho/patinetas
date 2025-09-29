@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const businesses = await negociosService.getAll()
     const businessPages = businesses.map(business => {
       const categorySlug = getCategorySlug(business.categoria)
-      const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+      const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
       const businessSlug = business.slug || business.id.toString()
 
       return {

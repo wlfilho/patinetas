@@ -18,7 +18,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
 
   // Generate SEO-friendly URL with new structure: /[categoria]/[cidade]/[negocio]
   const categorySlug = getCategorySlug(business.categoria)
-  const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+  const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
   const businessSlug = business.slug || generateBusinessSlug(business.nombre)
   const businessUrl = `/${categorySlug}/${citySlug}/${businessSlug}`
 

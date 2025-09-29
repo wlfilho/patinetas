@@ -322,7 +322,7 @@ export default function BusinessesPage() {
                         {/* Public View Icon */}
                         {business.ciudad && business.nombre && business.categoria && (
                           <Link
-                            href={`/${getCategorySlug(business.categoria)}/${business.ciudad_slug || getCitySlug(business.cidade)}/${business.slug || business.id}`}
+                            href={`/${getCategorySlug(business.categoria)}/${business.ciudad_slug || getCitySlug(business.ciudad)}/${business.slug || business.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded-md hover:bg-blue-50"
