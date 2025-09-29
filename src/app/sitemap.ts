@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
 import { negociosService } from '@/lib/supabase'
 import { generateSlug } from '@/lib/utils'
+import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://staging.motoselectricas.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   
   // Static pages
   const staticPages = [
@@ -47,14 +48,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    // Dynamic business pages
+    // Dynamic business pages - NEW URL STRUCTURE: /[categoria]/[cidade]/[negocio]
     const businesses = await negociosService.getAll()
-    const businessPages = businesses.map(business => ({
-      url: `${baseUrl}/negocio/${business.id}`,
-      lastModified: new Date(business.fecha_actualizacion),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }))
+    const businessPages = businesses.map(business => {
+      const categorySlug = getCategorySlug(business.categoria)
+      const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+      const businessSlug = business.slug || business.id.toString()
+
+      return {
+        url: `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`,
+        lastModified: new Date(business.fecha_actualizacion),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }
+    })
 
     // Category pages
     const categories = await negociosService.getCategories()

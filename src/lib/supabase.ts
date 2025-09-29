@@ -406,6 +406,85 @@ export const negociosService = {
     }
   },
 
+  // Get category by slug
+  async getCategoryBySlug(categorySlug: string) {
+    try {
+      const { data, error } = await supabase
+        .from('categorias_patinetas')
+        .select('*')
+        .eq('slug', categorySlug)
+        .eq('activo', true)
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.warn('Category not found:', error)
+      return null
+    }
+  },
+
+  // Get business by category, city and business slugs (NEW URL STRUCTURE)
+  async getByFullSlugs(categorySlug: string, citySlug: string, businessSlug: string) {
+    try {
+      // First, validate that the category exists
+      const category = await this.getCategoryBySlug(categorySlug)
+      if (!category) {
+        throw new Error('Category not found')
+      }
+
+      // Then get the business
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .eq('ciudad_slug', citySlug)
+        .eq('slug', businessSlug)
+        .eq('activo', true)
+        .single()
+
+      if (error) throw error
+
+      // Verify that the business belongs to the requested category
+      const { getCategorySlug } = await import('@/lib/slugs')
+      const businessCategorySlug = getCategorySlug(data.categoria)
+
+      if (businessCategorySlug !== categorySlug) {
+        throw new Error('Business does not belong to this category')
+      }
+
+      return data as NegocioDirectorio
+    } catch (error) {
+      console.warn('Supabase error in getByFullSlugs:', error)
+
+      // Fallback: try to find by generated slugs from existing data
+      try {
+        const { getCategorySlug, generateCitySlug, generateBusinessSlug } = await import('@/lib/slugs')
+        const { data: allData, error: allError } = await supabase
+          .from('diretorio_patinetas')
+          .select('*')
+          .eq('activo', true)
+
+        if (allError) throw allError
+
+        const business = allData.find(b => {
+          const businessCategorySlug = getCategorySlug(b.categoria)
+          const businessCitySlug = generateCitySlug(b.ciudad)
+          const businessNameSlug = generateBusinessSlug(b.nombre)
+
+          return businessCategorySlug === categorySlug &&
+                 businessCitySlug === citySlug &&
+                 businessNameSlug === businessSlug
+        })
+
+        if (!business) throw new Error('Business not found')
+        return business as NegocioDirectorio
+      } catch (fallbackError) {
+        console.warn('Fallback lookup failed:', fallbackError)
+        throw new Error('Business not found')
+      }
+    }
+  },
+
   // Get featured businesses for home page
   async getFeatured(limit = 8) {
     try {

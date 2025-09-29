@@ -1,16 +1,24 @@
 import { NegocioDirectorio } from '@/types'
+import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
 interface BusinessStructuredDataProps {
   business: NegocioDirectorio
 }
 
 export function BusinessStructuredData({ business }: BusinessStructuredDataProps) {
+  // Generate new URL structure: /[categoria]/[cidade]/[negocio]
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+  const categorySlug = getCategorySlug(business.categoria)
+  const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+  const businessSlug = business.slug || business.id.toString()
+  const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": business.nombre,
     "description": business.descripcion || `${business.nombre} - ${business.categoria} en ${business.ciudad}, ${business.departamento}`,
-    "url": `https://staging.motoselectricas.com.co/negocio/${business.id}`,
+    "url": businessUrl,
     "telephone": business.telefono,
     "email": business.email,
     "address": {
@@ -77,31 +85,41 @@ interface DirectoryStructuredDataProps {
 }
 
 export function DirectoryStructuredData({ businesses, category, city }: DirectoryStructuredDataProps) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": `Directorio de Patinetas Eléctricas${category ? ` - ${category}` : ''}${city ? ` en ${city}` : ''} - Colombia`,
     "description": `Encuentra los mejores negocios de patinetas eléctricas${category ? ` especializados en ${category.toLowerCase()}` : ''}${city ? ` en ${city}` : ''} en Colombia`,
-    "url": "https://staging.motoselectricas.com.co/directorio",
+    "url": `${baseUrl}/directorio`,
     "numberOfItems": businesses.length,
-    "itemListElement": businesses.slice(0, 20).map((business, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "LocalBusiness",
-        "name": business.nombre,
-        "description": business.descripcion,
-        "url": `https://staging.motoselectricas.com.co/negocio/${business.id}`,
-        "telephone": business.telefono,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": business.ciudad,
-          "addressRegion": business.departamento,
-          "addressCountry": "CO"
-        },
-        "image": business.imagen_url
+    "itemListElement": businesses.slice(0, 20).map((business, index) => {
+      // Generate new URL structure: /[categoria]/[cidade]/[negocio]
+      const categorySlug = getCategorySlug(business.categoria)
+      const citySlug = business.ciudad_slug || getCitySlug(business.cidade)
+      const businessSlug = business.slug || business.id.toString()
+      const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
+
+      return {
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "LocalBusiness",
+          "name": business.nombre,
+          "description": business.descripcion,
+          "url": businessUrl,
+          "telephone": business.telefono,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": business.ciudad,
+            "addressRegion": business.departamento,
+            "addressCountry": "CO"
+          },
+          "image": business.imagen_url
+        }
       }
-    }))
+    })
   }
 
   return (
@@ -118,12 +136,12 @@ export function WebsiteStructuredData() {
     "@type": "WebSite",
     "name": "Patinetas Eléctricas Colombia",
     "description": "El directorio más completo de patinetas eléctricas en Colombia. Encuentra tiendas, servicios técnicos, repuestos y más.",
-    "url": "https://staging.motoselectricas.com.co",
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}`,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://staging.motoselectricas.com.co/buscar?q={search_term_string}"
+        "urlTemplate": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/buscar?q={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
@@ -148,8 +166,8 @@ export function OrganizationStructuredData() {
     "@type": "Organization",
     "name": "Patinetas Eléctricas Colombia",
     "description": "Directorio especializado en patinetas eléctricas y movilidad sostenible en Colombia",
-    "url": "https://staging.motoselectricas.com.co",
-    "logo": "https://staging.motoselectricas.com.co/logo.png",
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}`,
+    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/logo.png`,
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+57-300-123-4567",

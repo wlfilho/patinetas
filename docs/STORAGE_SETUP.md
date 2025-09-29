@@ -21,7 +21,7 @@ If you want to create a separate `business-images` bucket for better organizatio
 ### 1. Create the Storage Bucket
 
 1. Go to your Supabase dashboard: https://supabase.com/dashboard
-2. Navigate to your project: `motoselectricas.co@protonmail.com's Project`
+2. Navigate to your Supabase project
 3. Go to **Storage** in the left sidebar
 4. Click **New bucket**
 5. Configure the bucket:

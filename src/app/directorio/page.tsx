@@ -261,8 +261,8 @@ function DirectorioContent({ initialPage = 1 }: DirectorioContentProps) {
 
   // Breadcrumb structured data
   const breadcrumbStructuredData = [
-    { name: 'Inicio', url: process.env.NEXT_PUBLIC_SITE_URL || 'https://staging.motoselectricas.com.co' },
-    { name: 'Directorio', url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://staging.motoselectricas.com.co'}/directorio` }
+    { name: 'Inicio', url: process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co' },
+    { name: 'Directorio', url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/directorio` }
   ]
 
   return (

@@ -1,4 +1,4 @@
-import { notFound, permanentRedirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -16,38 +16,55 @@ import BusinessHoursGrid from '@/components/ui/BusinessHoursGrid'
 import BusinessStatus from '@/components/ui/BusinessStatus'
 // import Breadcrumb, { BreadcrumbStructuredData } from '@/components/ui/Breadcrumb'
 import { ESPECIALIDADES_NEGOCIO } from '@/constants/especialidades'
-import { getCategorySlug } from '@/lib/slugs'
 
 interface PageProps {
-  params: Promise<{ cidade: string; 'nome-do-negocio': string }>
+  params: Promise<{ categoria: string; cidade: string; negocio: string }>
 }
 
-// Generate metadata for SEO - This will trigger redirect before metadata is used
+// Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { cidade, 'nome-do-negocio': nomeDoNegocio } = await params
+  const { categoria, cidade, negocio } = await params
 
   try {
-    const business = await negociosService.getBySlugs(cidade, nomeDoNegocio)
+    const business = await negociosService.getByFullSlugs(categoria, cidade, negocio)
 
-    // Generate category slug and redirect to new URL structure (308 Permanent Redirect)
-    const categorySlug = getCategorySlug(business.categoria)
-    const newUrl = `/${categorySlug}/${cidade}/${nomeDoNegocio}`
+    // Convert markdown description to plain text for SEO
+    const plainDescription = business.descripcion
+      ? markdownToPlainText(business.descripcion, 160)
+      : `${business.nombre} en ${business.ciudad}, ${business.departamento}. ${business.categoria} especializada en patinetas eléctricas.`
 
-    // Permanent redirect (308) to new URL structure
-    permanentRedirect(newUrl)
+    return {
+      title: generateMetaTitle(`${business.nombre} - ${business.categoria} en ${business.ciudad}`),
+      description: generateMetaDescription(plainDescription),
+      keywords: `${business.nombre}, ${business.categoria}, patinetas eléctricas, ${business.ciudad}, ${business.departamento}, Colombia`,
+      openGraph: {
+        title: `${business.nombre} - ${business.categoria}`,
+        description: plainDescription,
+        images: business.imagen_url ? [business.imagen_url] : [],
+        type: 'website',
+        locale: 'es_CO',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${business.nombre} - ${business.categoria}`,
+        description: plainDescription,
+        images: business.imagen_url ? [business.imagen_url] : [],
+      },
+    }
   } catch {
-    // If business not found, return 404
-    notFound()
+    return {
+      title: 'Negocio no encontrado',
+      description: 'El negocio que buscas no existe o no está disponible.',
+    }
   }
 }
 
 export default async function NegocioSlugPage({ params }: PageProps) {
-  const { cidade, 'nome-do-negocio': nomeDoNegocio } = await params
+  const { categoria, cidade, negocio } = await params
 
-  // Fetch business to get category information
   let business
   try {
-    business = await negociosService.getBySlugs(cidade, nomeDoNegocio)
+    business = await negociosService.getByFullSlugs(categoria, cidade, negocio)
   } catch {
     notFound()
   }
@@ -56,26 +73,23 @@ export default async function NegocioSlugPage({ params }: PageProps) {
     notFound()
   }
 
-  // Generate category slug and redirect to new URL structure (308 Permanent Redirect)
-  const categorySlug = getCategorySlug(business.categoria)
-  const newUrl = `/${categorySlug}/${cidade}/${nomeDoNegocio}`
-
-  // Permanent redirect (308) to new URL structure
-  permanentRedirect(newUrl)
+  const categoryIcon = getCategoryIcon(business.categoria)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+  const businessUrl = `${baseUrl}/${categoria}/${cidade}/${negocio}`
 
   // Breadcrumb items
   const breadcrumbItems = [
     { label: 'Directorio', href: '/directorio' },
-    { label: business.categoria, href: `/categorias/${business.categoria.toLowerCase().replace(/\s+/g, '-')}` },
-    { label: business.ciudad, href: `/ciudades/${business.ciudad.toLowerCase()}` },
+    { label: business.categoria, href: `/${categoria}` },
+    { label: business.ciudad, href: `/ciudades/${cidade}` },
     { label: business.nombre }
   ]
 
   const breadcrumbStructuredData = [
-    { name: 'Inicio', url: businessUrl.replace(`/negocio/${cidade}/${nomeDoNegocio}`, '') },
-    { name: 'Directorio', url: businessUrl.replace(`/negocio/${cidade}/${nomeDoNegocio}`, '/directorio') },
-    { name: business.categoria, url: businessUrl.replace(`/negocio/${cidade}/${nomeDoNegocio}`, `/categorias/${business.categoria.toLowerCase().replace(/\s+/g, '-')}`) },
-    { name: business.ciudad, url: businessUrl.replace(`/negocio/${cidade}/${nomeDoNegocio}`, `/ciudades/${business.ciudad.toLowerCase()}`) },
+    { name: 'Inicio', url: baseUrl },
+    { name: 'Directorio', url: `${baseUrl}/directorio` },
+    { name: business.categoria, url: `${baseUrl}/${categoria}` },
+    { name: business.ciudad, url: `${baseUrl}/ciudades/${cidade}` },
     { name: business.nombre, url: businessUrl }
   ]
 
