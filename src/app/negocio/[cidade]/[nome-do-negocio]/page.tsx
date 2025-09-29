@@ -2,7 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
-import { negociosService } from '@/lib/supabase'
+import { negociosService, NegocioDirectorio } from '@/lib/supabase'
 import { formatPhoneNumber, formatWhatsAppUrl, getCategoryIcon, generateMetaTitle, generateMetaDescription } from '@/lib/utils'
 import { formatBusinessHours } from '@/utils/businessHours'
 import { markdownToPlainText } from '@/lib/markdown'
@@ -45,7 +45,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
   const { cidade, 'nome-do-negocio': nomeDoNegocio } = await params
 
   // Fetch business to get category information
-  let business
+  let business: NegocioDirectorio
   try {
     business = await negociosService.getBySlugs(cidade, nomeDoNegocio)
   } catch {
