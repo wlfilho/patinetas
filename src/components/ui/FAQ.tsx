@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { FAQItem, faqSection } from '@/types/faq'
 import { FAQStructuredData } from '@/components/seo/FAQStructuredData'
 
@@ -136,7 +137,7 @@ export default function FAQ({ className = '' }: FAQProps) {
             <p className="text-gray-600 mb-4">
               ¿No encontraste la respuesta que buscabas?
             </p>
-            <a
+            <Link
               href="/contacto"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors"
             >
@@ -144,7 +145,7 @@ export default function FAQ({ className = '' }: FAQProps) {
               <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
