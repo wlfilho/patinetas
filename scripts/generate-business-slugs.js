@@ -54,12 +54,13 @@ function generateCitySlug(cityName) {
   return cityMappings[normalizedName] || generateSlug(cityName)
 }
 
-function generateUniqueBusinessSlug(businessName, cityName, existingBusinesses) {
+function generateUniqueBusinessSlug(businessId, businessName, cityName, existingBusinesses) {
   const baseSlug = generateSlug(businessName)
   const citySlug = generateCitySlug(cityName)
 
-  // Check if this slug already exists in the same city
+  // Check if this slug already exists in the same city (excluding the current business)
   const conflictingBusiness = existingBusinesses.find(business =>
+    business.id !== businessId && // Exclude the current business from comparison
     generateSlug(business.nombre) === baseSlug &&
     generateCitySlug(business.ciudad) === citySlug
   )
@@ -68,15 +69,16 @@ function generateUniqueBusinessSlug(businessName, cityName, existingBusinesses) 
   if (conflictingBusiness) {
     let counter = 2
     let uniqueSlug = `${baseSlug}-${counter}`
-    
+
     while (existingBusinesses.some(business =>
+      business.id !== businessId && // Exclude the current business from comparison
       generateSlug(business.nombre) === uniqueSlug &&
       generateCitySlug(business.ciudad) === citySlug
     )) {
       counter++
       uniqueSlug = `${baseSlug}-${counter}`
     }
-    
+
     return uniqueSlug
   }
 
@@ -102,6 +104,7 @@ async function generateSlugsForAllBusinesses() {
     for (const business of businesses) {
       const citySlug = generateCitySlug(business.ciudad)
       const businessSlug = generateUniqueBusinessSlug(
+        business.id, // Pass the business ID to exclude it from comparison
         business.nombre,
         business.ciudad,
         businesses
