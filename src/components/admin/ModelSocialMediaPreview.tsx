@@ -12,6 +12,7 @@ interface ModelSocialMediaPreviewProps {
 
 export default function ModelSocialMediaPreview({ seoData, modelName, brandName }: ModelSocialMediaPreviewProps) {
   const [activeTab, setActiveTab] = useState<'facebook' | 'twitter' | 'google'>('facebook')
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
 
   const getPreviewImage = () => {
     return seoData.og_image_url || '/images/default-model-og-image.jpg'
@@ -194,7 +195,7 @@ export default function ModelSocialMediaPreview({ seoData, modelName, brandName 
                     </h3>
                   </div>
                   <p className="text-xs text-green-700 mb-2">
-                    https://patinetaelectrica.com.co › catalogo › marcas › {brandName?.toLowerCase().replace(/\s+/g, '-') || 'marca'} › {modelName.toLowerCase().replace(/\s+/g, '-')}
+                    {baseUrl.replace('https://', '')} › catalogo › marcas › {brandName?.toLowerCase().replace(/\s+/g, '-') || 'marca'} › {modelName.toLowerCase().replace(/\s+/g, '-')}
                   </p>
                   <p className="text-sm text-gray-600 line-clamp-2">
                     {truncateText(seoData.seo_description, 160)}

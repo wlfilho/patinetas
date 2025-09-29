@@ -195,7 +195,7 @@ export default function DirectorioCategoryClient({
             "@type": "CollectionPage",
             "name": `${category.nombre} en Colombia`,
             "description": category.descripcion || `Directorio de ${category.nombre.toLowerCase()} en Colombia`,
-            "url": `https://staging.motoselectricas.com.co/directorio/${categorySlug}`,
+            "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/directorio/${categorySlug}`,
             "mainEntity": {
               "@type": "ItemList",
               "numberOfItems": filteredBusinesses.length,

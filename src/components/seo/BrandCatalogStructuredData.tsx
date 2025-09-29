@@ -7,7 +7,7 @@ interface BrandCatalogStructuredDataProps {
 }
 
 export function BrandCatalogStructuredData({ brand, models }: BrandCatalogStructuredDataProps) {
-  const baseUrl = 'https://patinetaelectrica.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   const brandSlug = getBrandSlug(brand.nombre)
 
   // Brand structured data

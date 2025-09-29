@@ -149,7 +149,7 @@ interface BrandsStructuredDataProps {
 }
 
 export function BrandsStructuredData({ brands }: BrandsStructuredDataProps) {
-  const baseUrl = 'https://staging.motoselectricas.com.co'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
 
   const brandsData = {
     "@context": "https://schema.org",

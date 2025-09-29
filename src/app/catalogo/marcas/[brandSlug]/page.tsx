@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: BrandCatalogPageProps): Promi
   const title = brand.seo_title || `${brand.nombre} - Patinetas Eléctricas | Catálogo Colombia`
   const description = brand.seo_description || `Descubre todos los modelos de patinetas eléctricas ${brand.nombre} disponibles en Colombia. Especificaciones, precios y dónde comprar ${brand.nombre}.`
   const keywords = brand.seo_keywords || `${brand.nombre}, patinetas eléctricas ${brand.nombre}, scooters eléctricos ${brand.nombre}, ${brand.nombre} Colombia, modelos ${brand.nombre}`
-  const canonicalUrl = brand.seo_canonical_url || `https://patinetaelectrica.com.co/catalogo/marcas/${brandSlug}`
+  const canonicalUrl = brand.seo_canonical_url || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/catalogo/marcas/${brandSlug}`
   const robotsDirective = brand.seo_robots || 'index,follow'
 
   // OpenGraph data

@@ -47,7 +47,7 @@ export default function ModelSEOManager({ model, onSEODataChange }: ModelSEOMana
   useEffect(() => {
     const modelSlug = getModelSlug(model.nombre)
     const brandSlug = model.marca?.nombre ? model.marca.nombre.toLowerCase().replace(/\s+/g, '-') : 'marca'
-    const baseUrl = 'https://patinetaelectrica.com.co'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
     
     const defaultSEOData: ModelSEOFormData = {
       seo_title: model.seo_title || `${model.nombre} - ${model.marca?.nombre || 'Patineta Eléctrica'} | Especificaciones y Precios`,

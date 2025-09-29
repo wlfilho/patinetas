@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "audit:indexation": "tsx scripts/audit-business-indexation.ts",
+    "generate-slugs": "tsx scripts/generate-business-slugs.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

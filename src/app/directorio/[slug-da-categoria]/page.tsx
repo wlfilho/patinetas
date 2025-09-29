@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
         description: category.descripcion || `Directorio de ${category.nombre.toLowerCase()} en Colombia`,
       },
       alternates: {
-        canonical: `https://staging.motoselectricas.com.co/directorio/${categorySlug}`
+        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/directorio/${categorySlug}`
       }
     }
   } catch (error) {

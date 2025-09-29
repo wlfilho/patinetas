@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         description,
         type: 'website',
         locale: 'es_CO',
-        url: `https://patinetaelectrica.com.co/catalogo/marcas/${brandSlug}/${modelSlug}`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/catalogo/marcas/${brandSlug}/${modelSlug}`,
         images: model.imagen_url ? [
           {
             url: model.imagen_url,
@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
         images: model.imagen_url ? [model.imagen_url] : [],
       },
       alternates: {
-        canonical: `https://patinetaelectrica.com.co/catalogo/marcas/${brandSlug}/${modelSlug}`,
+        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/catalogo/marcas/${brandSlug}/${modelSlug}`,
       },
     }
   } catch (error) {

@@ -46,7 +46,7 @@ export default function BrandSEOManager({ brand, onSEODataChange }: BrandSEOMana
   // Initialize SEO data from brand
   useEffect(() => {
     const brandSlug = getBrandSlug(brand.nombre)
-    const baseUrl = 'https://patinetaelectrica.com.co'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
     
     const defaultSEOData: SEOFormData = {
       seo_title: brand.seo_title || `${brand.nombre} - Patinetas Eléctricas | Catálogo Colombia`,

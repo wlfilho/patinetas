@@ -74,7 +74,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
   }
 
   const categoryIcon = getCategoryIcon(business.categoria)
-  const businessUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://staging.motoselectricas.com.co'}/negocio/${cidade}/${nomeDoNegocio}`
+  const businessUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${cidade}/${nomeDoNegocio}`
 
   // Breadcrumb items
   const breadcrumbItems = [

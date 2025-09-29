@@ -5,12 +5,17 @@ interface BusinessStructuredDataProps {
 }
 
 export function BusinessStructuredData({ business }: BusinessStructuredDataProps) {
+  // Generate URL using slugs if available, fallback to ID
+  const businessUrl = business.slug && business.ciudad_slug
+    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.ciudad_slug}/${business.slug}`
+    : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": business.nombre,
     "description": business.descripcion || `${business.nombre} - ${business.categoria} en ${business.ciudad}, ${business.departamento}`,
-    "url": `https://staging.motoselectricas.com.co/negocio/${business.id}`,
+    "url": businessUrl,
     "telephone": business.telefono,
     "email": business.email,
     "address": {
@@ -82,16 +87,22 @@ export function DirectoryStructuredData({ businesses, category, city }: Director
     "@type": "ItemList",
     "name": `Directorio de Patinetas Eléctricas${category ? ` - ${category}` : ''}${city ? ` en ${city}` : ''} - Colombia`,
     "description": `Encuentra los mejores negocios de patinetas eléctricas${category ? ` especializados en ${category.toLowerCase()}` : ''}${city ? ` en ${city}` : ''} en Colombia`,
-    "url": "https://staging.motoselectricas.com.co/directorio",
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/directorio`,
     "numberOfItems": businesses.length,
-    "itemListElement": businesses.slice(0, 20).map((business, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "LocalBusiness",
-        "name": business.nombre,
-        "description": business.descripcion,
-        "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`,
+    "itemListElement": businesses.slice(0, 20).map((business, index) => {
+      // Generate URL using slugs if available, fallback to ID
+      const businessUrl = business.slug && business.ciudad_slug
+        ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.ciudad_slug}/${business.slug}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`
+
+      return {
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "LocalBusiness",
+          "name": business.nombre,
+          "description": business.descripcion,
+          "url": businessUrl,
         "telephone": business.telefono,
         "address": {
           "@type": "PostalAddress",
@@ -100,8 +111,9 @@ export function DirectoryStructuredData({ businesses, category, city }: Director
           "addressCountry": "CO"
         },
         "image": business.imagen_url
+        }
       }
-    }))
+    })
   }
 
   return (

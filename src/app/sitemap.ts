@@ -50,12 +50,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Dynamic business pages
     const businesses = await negociosService.getAll()
-    const businessPages = businesses.map(business => ({
-      url: `${baseUrl}/negocio/${business.id}`,
-      lastModified: new Date(business.fecha_actualizacion),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }))
+    const businessPages = businesses
+      .filter(business => business.slug && business.ciudad_slug) // Only include businesses with slugs
+      .map(business => ({
+        url: `${baseUrl}/negocio/${business.ciudad_slug}/${business.slug}`,
+        lastModified: new Date(business.fecha_actualizacion),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }))
 
     // Category pages
     const categories = await negociosService.getCategories()

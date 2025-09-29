@@ -105,8 +105,8 @@ export default function BrandsDirectoryPage() {
         <meta property="og:title" content="Marcas de Patinetas Eléctricas en Colombia" />
         <meta property="og:description" content="Directorio completo de marcas de patinetas eléctricas disponibles en Colombia con modelos y especificaciones." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://patinetaelectrica.com.co/marcas" />
-        <link rel="canonical" href="https://patinetaelectrica.com.co/marcas" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/marcas`} />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/marcas`} />
       </Head>
 
       <BrandsStructuredData brands={brands} />
