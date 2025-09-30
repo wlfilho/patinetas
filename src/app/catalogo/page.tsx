@@ -7,17 +7,9 @@ import { brandService, modelService, MarcaPatineta, ModeloPatineta } from '@/lib
 import { getBrandSlug, generateUniqueModelSlug } from '@/lib/slugs'
 import { CatalogStructuredData } from '@/components/seo/CatalogStructuredData'
 import CatalogNavigation from '@/components/ui/CatalogNavigation'
+import AdvancedFilters, { AdvancedFilterOptions, createEmptyFilters } from '@/components/catalog/AdvancedFilters'
+import { applyAdvancedFilters, countActiveFilters, getFilterSummary } from '@/lib/filterUtils'
 import Link from 'next/link'
-
-interface CatalogFilters {
-  brandId: string
-  priceMin: string
-  priceMax: string
-  speedMin: string
-  speedMax: string
-  rangeMin: string
-  rangeMax: string
-}
 
 function CatalogoPageContent() {
   const searchParams = useSearchParams()
@@ -28,15 +20,7 @@ function CatalogoPageContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBrand, setSelectedBrand] = useState<string>('')
   const [showFilters, setShowFilters] = useState(false)
-  const [filters, setFilters] = useState<CatalogFilters>({
-    brandId: '',
-    priceMin: '',
-    priceMax: '',
-    speedMin: '',
-    speedMax: '',
-    rangeMin: '',
-    rangeMax: ''
-  })
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterOptions>(createEmptyFilters())
 
   // Handle URL parameters for backward compatibility
   useEffect(() => {
@@ -52,7 +36,7 @@ function CatalogoPageContent() {
 
   useEffect(() => {
     applyFilters()
-  }, [models, searchQuery, selectedBrand, filters])
+  }, [models, searchQuery, selectedBrand, advancedFilters])
 
   const loadData = async () => {
     try {
@@ -88,41 +72,8 @@ function CatalogoPageContent() {
       filtered = filtered.filter(model => model.marca_id === selectedBrand)
     }
 
-    // Price filters
-    if (filters.priceMin) {
-      filtered = filtered.filter(model => 
-        model.precio_min && model.precio_min >= parseInt(filters.priceMin)
-      )
-    }
-    if (filters.priceMax) {
-      filtered = filtered.filter(model => 
-        model.precio_max && model.precio_max <= parseInt(filters.priceMax)
-      )
-    }
-
-    // Speed filters
-    if (filters.speedMin) {
-      filtered = filtered.filter(model => 
-        model.velocidad_maxima && model.velocidad_maxima >= parseInt(filters.speedMin)
-      )
-    }
-    if (filters.speedMax) {
-      filtered = filtered.filter(model => 
-        model.velocidad_maxima && model.velocidad_maxima <= parseInt(filters.speedMax)
-      )
-    }
-
-    // Range filters
-    if (filters.rangeMin) {
-      filtered = filtered.filter(model => 
-        model.autonomia && model.autonomia >= parseInt(filters.rangeMin)
-      )
-    }
-    if (filters.rangeMax) {
-      filtered = filtered.filter(model => 
-        model.autonomia && model.autonomia <= parseInt(filters.rangeMax)
-      )
-    }
+    // Apply advanced filters
+    filtered = applyAdvancedFilters(filtered, advancedFilters)
 
     setFilteredModels(filtered)
   }
@@ -139,16 +90,11 @@ function CatalogoPageContent() {
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedBrand('')
-    setFilters({
-      brandId: '',
-      priceMin: '',
-      priceMax: '',
-      speedMin: '',
-      speedMax: '',
-      rangeMin: '',
-      rangeMax: ''
-    })
+    setAdvancedFilters(createEmptyFilters())
   }
+
+  const activeFilterCount = countActiveFilters(advancedFilters)
+  const filterSummary = getFilterSummary(advancedFilters)
 
   if (loading) {
     return (
@@ -222,18 +168,32 @@ function CatalogoPageContent() {
               </select>
 
               <button
+                type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-primary"
+                className={`px-4 py-3 border-2 rounded-lg font-medium transition-all ${
+                  showFilters
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
+                }`}
               >
-                Filtros Avanzados
+                <span className="flex items-center gap-2">
+                  <span>🔍</span>
+                  Filtros Avanzados
+                  {activeFilterCount > 0 && (
+                    <span className="bg-white text-primary px-2 py-0.5 rounded-full text-xs font-bold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </span>
               </button>
 
-              {(searchQuery || selectedBrand || Object.values(filters).some(f => f)) && (
+              {(searchQuery || selectedBrand || activeFilterCount > 0) && (
                 <button
+                  type="button"
                   onClick={clearFilters}
-                  className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-3 bg-red-50 text-red-600 border-2 border-red-200 rounded-lg hover:bg-red-100 font-medium transition-colors"
                 >
-                  Limpiar
+                  Limpiar Todo
                 </button>
               )}
             </div>
@@ -241,61 +201,74 @@ function CatalogoPageContent() {
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="mt-6 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtros Avanzados</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Precio Mínimo (COP)</label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    placeholder="500,000"
-                    value={filters.priceMin}
-                    onChange={(e) => setFilters({...filters, priceMin: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Precio Máximo (COP)</label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    placeholder="3,000,000"
-                    value={filters.priceMax}
-                    onChange={(e) => setFilters({...filters, priceMax: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Velocidad Mín. (km/h)</label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    placeholder="20"
-                    value={filters.speedMin}
-                    onChange={(e) => setFilters({...filters, speedMin: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Autonomía Mín. (km)</label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                    placeholder="20"
-                    value={filters.rangeMin}
-                    onChange={(e) => setFilters({...filters, rangeMin: e.target.value})}
-                  />
-                </div>
-              </div>
+            <div className="mt-6">
+              <AdvancedFilters
+                filters={advancedFilters}
+                onChange={setAdvancedFilters}
+                onClear={() => setAdvancedFilters(createEmptyFilters())}
+                models={models}
+              />
             </div>
           )}
         </div>
       </section>
+
+      {/* Active Filters Summary */}
+      {(activeFilterCount > 0 || searchQuery || selectedBrand) && (
+        <section className="py-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-y border-gray-200">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-semibold text-gray-700">Filtros activos:</span>
+
+              {searchQuery && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-full text-sm">
+                  <span>🔍</span>
+                  <span className="font-medium">&ldquo;{searchQuery}&rdquo;</span>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {selectedBrand && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-full text-sm">
+                  <span>🏷️</span>
+                  <span className="font-medium">{brands.find(b => b.id === selectedBrand)?.nombre}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBrand('')}
+                    className="ml-1 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {filterSummary.map((summary, index) => (
+                <span key={index} className="inline-flex items-center px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
+                  {summary}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Results Summary */}
       <section className="py-6 bg-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <p className="text-gray-600">
-              Mostrando {filteredModels.length} de {models.length} modelos
+              <span className="font-semibold text-gray-900">{filteredModels.length}</span> de {models.length} modelos
+              {activeFilterCount > 0 && (
+                <span className="ml-2 text-sm text-primary">
+                  ({activeFilterCount} filtro{activeFilterCount !== 1 ? 's' : ''} activo{activeFilterCount !== 1 ? 's' : ''})
+                </span>
+              )}
             </p>
             <div className="text-sm text-gray-500">
               {brands.length} marcas disponibles
