@@ -131,12 +131,14 @@ export default function BrandCarousel({
               className="flex-shrink-0 px-2 sm:px-3"
               style={{ width: `${100 / brandsPerSlide}%` }}
             >
-              <Link
+              {/* TEMPORARY: Brand cards are not clickable until catalog is fully populated */}
+              {/* TODO: Uncomment Link wrapper when electric scooter specifications are complete */}
+              {/* <Link
                 href={`/catalogo/marcas/${getBrandSlug(brand.nombre)}`}
                 className="block group"
                 aria-label={`Ver modelos de ${brand.nombre}`}
-              >
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all duration-300 group-hover:scale-105">
+              > */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all duration-300">
                   <div className="aspect-square relative mb-3">
                     <Image
                       src={brand.logo_url!}
@@ -147,7 +149,7 @@ export default function BrandCarousel({
                     />
                   </div>
                   <div className="text-center">
-                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold text-gray-900 text-sm sm:text-base transition-colors">
                       {brand.nombre}
                     </h3>
                     {brand.pais_origen && (
@@ -157,7 +159,7 @@ export default function BrandCarousel({
                     )}
                   </div>
                 </div>
-              </Link>
+              {/* </Link> */}
             </div>
           ))}
         </div>

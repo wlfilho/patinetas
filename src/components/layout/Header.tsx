@@ -7,7 +7,9 @@ import { usePathname } from 'next/navigation'
 const navigation = [
   { name: 'Inicio', href: '/' },
   { name: 'Directorio', href: '/directorio' },
-  { name: 'Catálogo', href: '/catalogo' },
+  // TEMPORARY: Catalog hidden from navigation until model data is fully populated
+  // TODO: Uncomment this line when electric scooter specifications are complete
+  // { name: 'Catálogo', href: '/catalogo' },
   { name: 'Contacto', href: '/contacto' },
 ]
 

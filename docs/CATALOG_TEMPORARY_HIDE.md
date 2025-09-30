@@ -96,7 +96,85 @@ disallow: [
 **Efecto:**
 - ❌ Botón "Ver Todas las Marcas" NO visible en la página principal
 - ❌ Usuarios no pueden descubrir el catálogo desde la home
-- ✅ Carrusel de marcas sigue visible (sin link)
+- ✅ Carrusel de marcas sigue visible (sin links clicables)
+
+---
+
+### 4. **Header de Navegación - Link Removido**
+
+**Archivo:** `src/components/layout/Header.tsx`
+
+**Cambios:**
+```tsx
+const navigation = [
+  { name: 'Inicio', href: '/' },
+  { name: 'Directorio', href: '/directorio' },
+  // TEMPORARY: Catalog hidden from navigation until model data is fully populated
+  // TODO: Uncomment this line when electric scooter specifications are complete
+  // { name: 'Catálogo', href: '/catalogo' },
+  { name: 'Contacto', href: '/contacto' },
+]
+```
+
+**Efecto:**
+- ❌ Link "Catálogo" NO visible en el menú de navegación principal
+- ❌ Afecta tanto navegación desktop como mobile
+- ❌ Usuarios no pueden acceder al catálogo desde el header
+
+---
+
+### 5. **BrandCarousel - Cards No Clicables**
+
+**Archivo:** `src/components/ui/BrandCarousel.tsx`
+
+**Cambios:**
+```tsx
+{/* TEMPORARY: Brand cards are not clickable until catalog is fully populated */}
+{/* TODO: Uncomment Link wrapper when electric scooter specifications are complete */}
+{/* <Link
+  href={`/catalogo/marcas/${getBrandSlug(brand.nombre)}`}
+  className="block group"
+  aria-label={`Ver modelos de ${brand.nombre}`}
+> */}
+  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 transition-all duration-300">
+    {/* Brand content */}
+  </div>
+{/* </Link> */}
+```
+
+**Efecto:**
+- ❌ Cards de marcas en el carrusel NO son clicables
+- ✅ Carrusel sigue visible como elemento visual
+- ❌ No redirige al catálogo al hacer clic
+
+---
+
+### 6. **Página /marcas - Cards No Clicables**
+
+**Archivo:** `src/app/marcas/page.tsx`
+
+**Cambios:**
+```tsx
+// TEMPORARY: Brand cards are not clickable until catalog is fully populated
+// TODO: Uncomment Link wrapper when electric scooter specifications are complete
+// <Link
+//   key={brand.id}
+//   href={`/catalogo/marcas/${brand.slug}`}
+//   className="group"
+// >
+<div key={brand.id}>
+  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all duration-300">
+    {/* Brand content */}
+  </div>
+</div>
+// </Link>
+```
+
+**Efecto:**
+- ❌ Cards de marcas en /marcas NO son clicables
+- ✅ Página /marcas sigue accesible
+- ❌ No redirige al catálogo al hacer clic
+- ❌ Botón "Ver Modelos" oculto
 
 ---
 

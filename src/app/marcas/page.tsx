@@ -206,12 +206,15 @@ export default function BrandsDirectoryPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredAndSortedBrands.map((brand) => (
-                <Link
-                  key={brand.id}
-                  href={`/catalogo/marcas/${brand.slug}`}
-                  className="group"
-                >
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-primary/20 transition-all duration-300 group-hover:scale-105">
+                // TEMPORARY: Brand cards are not clickable until catalog is fully populated
+                // TODO: Uncomment Link wrapper when electric scooter specifications are complete
+                // <Link
+                //   key={brand.id}
+                //   href={`/catalogo/marcas/${brand.slug}`}
+                //   className="group"
+                // >
+                <div key={brand.id}>
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all duration-300">
                     {/* Brand Logo */}
                     <div className="aspect-square relative mb-4 bg-gray-50 rounded-lg overflow-hidden">
                       {brand.logo_url ? (
@@ -234,10 +237,10 @@ export default function BrandsDirectoryPage() {
 
                     {/* Brand Info */}
                     <div className="text-center">
-                      <h3 className="font-bold text-lg text-gray-900 group-hover:text-primary transition-colors mb-2">
+                      <h3 className="font-bold text-lg text-gray-900 transition-colors mb-2">
                         {brand.nombre}
                       </h3>
-                      
+
                       {brand.pais_origen && (
                         <p className="text-sm text-gray-500 mb-2">
                           📍 {brand.pais_origen}
@@ -255,19 +258,20 @@ export default function BrandsDirectoryPage() {
                       )}
                     </div>
 
-                    {/* View Models Button */}
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    {/* View Models Button - Temporarily disabled */}
+                    {/* <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="text-center">
-                        <span className="inline-flex items-center text-sm font-medium text-primary group-hover:text-primary-dark">
+                        <span className="inline-flex items-center text-sm font-medium text-primary">
                           Ver Modelos
-                          <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
-                </Link>
+                </div>
+                // </Link>
               ))}
             </div>
           )}
