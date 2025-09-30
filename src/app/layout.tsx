@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { WebsiteStructuredData, OrganizationStructuredData } from "@/components/seo/StructuredData";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,6 +77,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
         suppressHydrationWarning={true}
       >
+        <GoogleAnalytics />
         <Header />
         <main className="flex-1">
           {children}
