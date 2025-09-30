@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { EspecificacionesTecnicas } from '@/types/especificaciones'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -91,15 +92,15 @@ export interface ModeloPatineta {
   nombre: string
   descripcion?: string
   imagen_url?: string
-  velocidad_maxima?: number // km/h
-  autonomia?: number // km
-  peso?: number // kg
-  potencia?: number // watts
-  tiempo_carga?: number // horas
+  velocidad_maxima?: number // km/h (mantido para compatibilidade, mas também em especificaciones.rendimiento)
+  autonomia?: number // km (mantido para compatibilidade, mas também em especificaciones.rendimiento)
+  peso?: number // kg (mantido para compatibilidade, mas também em especificaciones.dimensiones)
+  potencia?: number // watts (mantido para compatibilidade, mas também em especificaciones.motor)
+  tiempo_carga?: number // horas (mantido para compatibilidade, mas também em especificaciones.bateria)
   precio_min?: number // COP
   precio_max?: number // COP
   disponible_colombia: boolean
-  especificaciones?: Record<string, unknown>
+  especificaciones?: EspecificacionesTecnicas // Tipagem forte para especificações técnicas
   activo: boolean
   orden: number
   created_at?: string

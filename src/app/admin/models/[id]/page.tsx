@@ -7,6 +7,8 @@ import Link from 'next/link'
 import ModelImageUpload from '@/components/admin/ModelImageUpload'
 import ModelSEOManager, { ModelSEOFormData } from '@/components/admin/ModelSEOManager'
 import ModelSocialMediaPreview from '@/components/admin/ModelSocialMediaPreview'
+import ModelSpecificationsManager from '@/components/admin/ModelSpecificationsManager'
+import { EspecificacionesTecnicas, createEmptyEspecificaciones } from '@/types/especificaciones'
 
 interface EditModelPageProps {
   params: Promise<{ id: string }>
@@ -20,8 +22,11 @@ export default function EditModelPage({ params }: EditModelPageProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'basic' | 'seo'>('basic')
+  const [activeTab, setActiveTab] = useState<'basic' | 'specs' | 'seo'>('basic')
   const [showSEOPreview, setShowSEOPreview] = useState(false)
+  const [especificaciones, setEspecificaciones] = useState<EspecificacionesTecnicas>(
+    createEmptyEspecificaciones()
+  )
   const [seoData, setSeoData] = useState<ModelSEOFormData>({
     seo_title: '',
     seo_description: '',
@@ -78,6 +83,11 @@ export default function EditModelPage({ params }: EditModelPageProps) {
         activo: data.activo,
         orden: data.orden
       })
+
+      // Populate specifications data
+      if (data.especificaciones) {
+        setEspecificaciones(data.especificaciones as EspecificacionesTecnicas)
+      }
 
       // Populate SEO data
       setSeoData({
@@ -143,9 +153,13 @@ export default function EditModelPage({ params }: EditModelPageProps) {
     setSeoData(newSeoData)
   }, [])
 
+  const handleSpecificationsChange = useCallback((newSpecs: EspecificacionesTecnicas) => {
+    setEspecificaciones(newSpecs)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.marca_id || !formData.nombre) {
       alert('Por favor completa los campos obligatorios (Marca y Nombre)')
       return
@@ -153,8 +167,8 @@ export default function EditModelPage({ params }: EditModelPageProps) {
 
     try {
       setSaving(true)
-      
-      // Convert string numbers to actual numbers and include SEO data
+
+      // Convert string numbers to actual numbers and include SEO data and specifications
       const updates: Partial<Omit<ModeloPatineta, 'id' | 'created_at' | 'updated_at' | 'marca'>> = {
         marca_id: formData.marca_id,
         nombre: formData.nombre.trim(),
@@ -170,6 +184,8 @@ export default function EditModelPage({ params }: EditModelPageProps) {
         disponible_colombia: formData.disponible_colombia,
         activo: formData.activo,
         orden: formData.orden,
+        // Technical specifications
+        especificaciones: especificaciones,
         // SEO fields
         seo_title: seoData.seo_title.trim() || undefined,
         seo_description: seoData.seo_description.trim() || undefined,
@@ -257,6 +273,22 @@ export default function EditModelPage({ params }: EditModelPageProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Información Básica
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('specs')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'specs'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Ficha Técnica
               </div>
             </button>
             <button
@@ -540,6 +572,15 @@ export default function EditModelPage({ params }: EditModelPageProps) {
               </div>
             </div>
           </div>
+            </div>
+          )}
+
+          {activeTab === 'specs' && (
+            <div className="space-y-6">
+              <ModelSpecificationsManager
+                initialData={especificaciones}
+                onChange={handleSpecificationsChange}
+              />
             </div>
           )}
 
