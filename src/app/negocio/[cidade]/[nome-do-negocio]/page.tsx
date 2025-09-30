@@ -41,14 +41,9 @@ export default async function NegocioSlugPage({ params }: PageProps) {
     notFound()
   }
 
-<<<<<<< HEAD
-  const categoryIcon = getCategoryIcon(business.categoria)
-  const businessUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${cidade}/${nomeDoNegocio}`
-=======
   // Generate category slug and redirect to new URL structure (308 Permanent Redirect)
   const categorySlug = getCategorySlug(business.categoria)
   const newUrl = `/${categorySlug}/${cidade}/${nomeDoNegocio}`
->>>>>>> staging
 
   // Permanent redirect (308) to new URL structure
   // This throws an error that Next.js catches to perform the redirect
