@@ -64,6 +64,7 @@ export default function ModelSpecificationsManager({ initialData, onChange }: Mo
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`
                 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors
