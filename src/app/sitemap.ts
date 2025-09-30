@@ -21,12 +21,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/catalogo`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
+    // TEMPORARY: Catalog hidden from sitemap until model data is fully populated
+    // TODO: Uncomment these lines once electric scooter specifications are complete
+    // {
+    //   url: `${baseUrl}/catalogo`,
+    //   lastModified: new Date(),
+    //   changeFrequency: 'weekly' as const,
+    //   priority: 0.8,
+    // },
+    // {
+    //   url: `${baseUrl}/catalogo/marcas`,
+    //   lastModified: new Date(),
+    //   changeFrequency: 'weekly' as const,
+    //   priority: 0.8,
+    // },
     {
       url: `${baseUrl}/categorias`,
       lastModified: new Date(),

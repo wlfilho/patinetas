@@ -151,7 +151,9 @@ export default function Home() {
             className="mb-8"
           />
 
-          <div className="text-center">
+          {/* TEMPORARY: Catalog link hidden until model data is fully populated */}
+          {/* TODO: Uncomment this section once electric scooter specifications are complete */}
+          {/* <div className="text-center">
             <Link
               href="/catalogo/marcas"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary-dark transition-colors"
@@ -161,7 +163,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-          </div>
+          </div> */}
         </div>
       </section>
 
