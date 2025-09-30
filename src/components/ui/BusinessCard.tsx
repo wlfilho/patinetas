@@ -6,13 +6,15 @@ import { NegocioDirectorio } from '@/types'
 import { formatWhatsAppUrl, getCategoryIcon } from '@/lib/utils'
 import { getCitySlug, generateBusinessSlug, getCategorySlug } from '@/lib/slugs'
 import { markdownToPlainText } from '@/lib/markdown'
+import { trackBusinessCardClick, trackContactButtonClick } from '@/lib/analytics'
 
 interface BusinessCardProps {
   business: NegocioDirectorio
   featured?: boolean
+  location?: string // Where the card is displayed (e.g., 'home', 'search', 'category_page')
 }
 
-export default function BusinessCard({ business, featured = false }: BusinessCardProps) {
+export default function BusinessCard({ business, featured = false, location = 'unknown' }: BusinessCardProps) {
   const categoryIcon = getCategoryIcon(business.categoria)
   const whatsappUrl = business.whatsapp ? formatWhatsAppUrl(business.whatsapp, `Hola, me interesa conocer más sobre ${business.nombre}`) : null
 
@@ -21,6 +23,41 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
   const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
   const businessSlug = business.slug || generateBusinessSlug(business.nombre)
   const businessUrl = `/${categorySlug}/${citySlug}/${businessSlug}`
+
+  // Handle card click tracking
+  const handleCardClick = () => {
+    trackBusinessCardClick({
+      businessId: business.id,
+      businessName: business.nombre,
+      category: business.categoria,
+      city: business.ciudad,
+      location: location,
+    })
+  }
+
+  // Handle contact button clicks
+  const handleContactClick = (contactType: 'whatsapp' | 'phone' | 'website', e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    trackContactButtonClick({
+      contactType,
+      businessId: business.id,
+      businessName: business.nombre,
+      category: business.categoria,
+      city: business.ciudad,
+      location: 'card',
+    })
+
+    // Execute the original action
+    if (contactType === 'whatsapp' && whatsappUrl) {
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+    } else if (contactType === 'phone' && business.telefono) {
+      window.location.href = `tel:${business.telefono}`
+    } else if (contactType === 'website' && business.sitio_web) {
+      window.open(business.sitio_web, '_blank', 'noopener,noreferrer')
+    }
+  }
 
   return (
     <div
@@ -56,7 +93,10 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
       {/* Business Info */}
       <div
         className="p-6 cursor-pointer"
-        onClick={() => window.location.href = businessUrl}
+        onClick={() => {
+          handleCardClick()
+          window.location.href = businessUrl
+        }}
       >
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
@@ -108,11 +148,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             {/* WhatsApp */}
             {whatsappUrl && (
               <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
-                }}
+                onClick={(e) => handleContactClick('whatsapp', e)}
                 className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors cursor-pointer"
                 title="Contactar por WhatsApp"
                 aria-label="Contactar por WhatsApp"
@@ -127,12 +163,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             {/* Phone */}
             {business.telefono && (
               <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-
-                  window.location.href = `tel:${business.telefono}`
-                }}
+                onClick={(e) => handleContactClick('phone', e)}
                 className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors cursor-pointer"
                 title="Llamar"
                 aria-label="Llamar por teléfono"
@@ -147,11 +178,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             {/* Website */}
             {business.sitio_web && (
               <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  window.open(business.sitio_web, '_blank', 'noopener,noreferrer')
-                }}
+                onClick={(e) => handleContactClick('website', e)}
                 className="flex items-center justify-center w-8 h-8 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors cursor-pointer"
                 title="Visitar sitio web"
                 aria-label="Visitar sitio web"
@@ -170,6 +197,7 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              handleCardClick()
               window.location.href = businessUrl
             }}
             className="px-3 py-1.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors cursor-pointer"

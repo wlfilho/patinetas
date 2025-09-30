@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { trackSearch } from '@/lib/analytics'
 
 interface SearchBarProps {
   placeholder?: string
@@ -32,19 +33,28 @@ export default function SearchBar({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!query.trim()) return
 
     const searchParams = new URLSearchParams()
     searchParams.set('q', query.trim())
-    
+
     if (filters.categoria) {
       searchParams.set('categoria', filters.categoria)
     }
-    
+
     if (filters.ciudad) {
       searchParams.set('ciudad', filters.ciudad)
     }
+
+    // Track search event (results count will be tracked on search page)
+    trackSearch({
+      query: query.trim(),
+      hasFilters: !!(filters.categoria || filters.ciudad),
+      category: filters.categoria,
+      city: filters.ciudad,
+      resultsCount: 0, // Will be updated on search results page
+    })
 
     router.push(`/buscar?${searchParams.toString()}`)
   }

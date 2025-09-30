@@ -88,10 +88,11 @@ export default function FeaturedBusinesses({ limit = 8, className = '' }: Featur
             {/* Business Grid */}
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {businesses.map((business) => (
-                <BusinessCard 
-                  key={business.id} 
-                  business={business} 
+                <BusinessCard
+                  key={business.id}
+                  business={business}
                   featured={true}
+                  location="home_featured"
                 />
               ))}
             </div>

@@ -7,6 +7,7 @@ import SearchBar from '@/components/ui/SearchBar'
 import BusinessCard from '@/components/ui/BusinessCard'
 import { NegocioDirectorio } from '@/types'
 import { negociosService } from '@/lib/supabase'
+import { trackSearch } from '@/lib/analytics'
 
 function BuscarContent() {
   const [businesses, setBusinesses] = useState<NegocioDirectorio[]>([])
@@ -53,6 +54,17 @@ function BuscarContent() {
       }
 
       setBusinesses(results)
+
+      // Track search with results count
+      if (query) {
+        trackSearch({
+          query: query,
+          hasFilters: !!(categoria || ciudad),
+          category: categoria || undefined,
+          city: ciudad || undefined,
+          resultsCount: results.length,
+        })
+      }
     } catch (err) {
       setError('Error al realizar la búsqueda. Por favor, intenta de nuevo.')
       console.error('Search error:', err)
@@ -156,7 +168,7 @@ function BuscarContent() {
             {!loading && !error && businesses.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {businesses.map((business) => (
-                  <BusinessCard key={business.id} business={business} />
+                  <BusinessCard key={business.id} business={business} location="search_results" />
                 ))}
               </div>
             )}
