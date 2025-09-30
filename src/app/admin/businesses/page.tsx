@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { adminService } from '@/lib/supabase'
 import { NegocioDirectorio } from '@/lib/supabase'
 import ToggleSwitch from '@/components/ui/ToggleSwitch'
+import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
 export default function BusinessesPage() {
   const [businesses, setBusinesses] = useState<NegocioDirectorio[]>([])
@@ -319,9 +320,9 @@ export default function BusinessesPage() {
                         </Link>
 
                         {/* Public View Icon */}
-                        {business.ciudad && business.nombre && (
+                        {business.ciudad && business.nombre && business.categoria && (
                           <Link
-                            href={`/negocio/${business.ciudad.toLowerCase()}/${business.nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                            href={`/${getCategorySlug(business.categoria)}/${business.ciudad_slug || getCitySlug(business.ciudad)}/${business.slug || business.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded-md hover:bg-blue-50"

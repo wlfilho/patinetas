@@ -385,13 +385,33 @@ export function generateUniqueBusinessSlug(
 }
 
 /**
- * Create a full business URL path from city and business names
+ * Create a full business URL path from category, city and business names (NEW STRUCTURE)
+ * @param categoryName - The category name
  * @param cityName - The city name
  * @param businessName - The business name
  * @param existingBusinesses - Array of existing businesses to check for duplicates
  * @returns The full URL path for the business
  */
 export function createBusinessUrlPath(
+  categoryName: string,
+  cityName: string,
+  businessName: string,
+  existingBusinesses: Array<{ nombre: string; ciudad: string; slug?: string }> = []
+): string {
+  const categorySlug = getCategorySlug(categoryName)
+  const citySlug = getCitySlug(cityName)
+  const businessSlug = generateUniqueBusinessSlug(businessName, cityName, existingBusinesses)
+  return `/${categorySlug}/${citySlug}/${businessSlug}`
+}
+
+/**
+ * Create a legacy business URL path (OLD STRUCTURE - for backwards compatibility)
+ * @param cityName - The city name
+ * @param businessName - The business name
+ * @param existingBusinesses - Array of existing businesses to check for duplicates
+ * @returns The full URL path for the business (old format)
+ */
+export function createLegacyBusinessUrlPath(
   cityName: string,
   businessName: string,
   existingBusinesses: Array<{ nombre: string; ciudad: string; slug?: string }> = []

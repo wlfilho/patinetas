@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next'
 import { negociosService } from '@/lib/supabase'
 import { generateSlug } from '@/lib/utils'
+import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Use environment variable for base URL, fallback to production URL
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   
   // Static pages
@@ -48,16 +48,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    // Dynamic business pages
+    // Dynamic business pages - NEW URL STRUCTURE: /[categoria]/[cidade]/[negocio]
     const businesses = await negociosService.getAll()
-    const businessPages = businesses
-      .filter(business => business.slug && business.ciudad_slug) // Only include businesses with slugs
-      .map(business => ({
-        url: `${baseUrl}/negocio/${business.ciudad_slug}/${business.slug}`,
+    const businessPages = businesses.map(business => {
+      const categorySlug = getCategorySlug(business.categoria)
+      const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
+      const businessSlug = business.slug || business.id.toString()
+
+      return {
+        url: `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`,
         lastModified: new Date(business.fecha_actualizacion),
         changeFrequency: 'weekly' as const,
         priority: 0.6,
-      }))
+      }
+    })
 
     // Category pages
     const categories = await negociosService.getCategories()

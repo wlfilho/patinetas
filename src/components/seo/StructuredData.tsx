@@ -1,14 +1,17 @@
 import { NegocioDirectorio } from '@/types'
+import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
 interface BusinessStructuredDataProps {
   business: NegocioDirectorio
 }
 
 export function BusinessStructuredData({ business }: BusinessStructuredDataProps) {
-  // Generate URL using slugs if available, fallback to ID
-  const businessUrl = business.slug && business.ciudad_slug
-    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.ciudad_slug}/${business.slug}`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`
+  // Generate new URL structure: /[categoria]/[cidade]/[negocio]
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+  const categorySlug = getCategorySlug(business.categoria)
+  const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
+  const businessSlug = business.slug || business.id.toString()
+  const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -82,18 +85,21 @@ interface DirectoryStructuredDataProps {
 }
 
 export function DirectoryStructuredData({ businesses, category, city }: DirectoryStructuredDataProps) {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": `Directorio de Patinetas Eléctricas${category ? ` - ${category}` : ''}${city ? ` en ${city}` : ''} - Colombia`,
     "description": `Encuentra los mejores negocios de patinetas eléctricas${category ? ` especializados en ${category.toLowerCase()}` : ''}${city ? ` en ${city}` : ''} en Colombia`,
-    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/directorio`,
+    "url": `${baseUrl}/directorio`,
     "numberOfItems": businesses.length,
     "itemListElement": businesses.slice(0, 20).map((business, index) => {
-      // Generate URL using slugs if available, fallback to ID
-      const businessUrl = business.slug && business.ciudad_slug
-        ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.ciudad_slug}/${business.slug}`
-        : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/negocio/${business.id}`
+      // Generate new URL structure: /[categoria]/[cidade]/[negocio]
+      const categorySlug = getCategorySlug(business.categoria)
+      const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
+      const businessSlug = business.slug || business.id.toString()
+      const businessUrl = `${baseUrl}/${categorySlug}/${citySlug}/${businessSlug}`
 
       return {
         "@type": "ListItem",
@@ -103,14 +109,14 @@ export function DirectoryStructuredData({ businesses, category, city }: Director
           "name": business.nombre,
           "description": business.descripcion,
           "url": businessUrl,
-        "telephone": business.telefono,
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": business.ciudad,
-          "addressRegion": business.departamento,
-          "addressCountry": "CO"
-        },
-        "image": business.imagen_url
+          "telephone": business.telefono,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": business.ciudad,
+            "addressRegion": business.departamento,
+            "addressCountry": "CO"
+          },
+          "image": business.imagen_url
         }
       }
     })
@@ -130,7 +136,7 @@ export function WebsiteStructuredData() {
     "@type": "WebSite",
     "name": "Patinetas Eléctricas Colombia",
     "description": "El directorio más completo de patinetas eléctricas en Colombia. Encuentra tiendas, servicios técnicos, repuestos y más.",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://patinetaelectrica.com.co",
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}`,
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -160,7 +166,7 @@ export function OrganizationStructuredData() {
     "@type": "Organization",
     "name": "Patinetas Eléctricas Colombia",
     "description": "Directorio especializado en patinetas eléctricas y movilidad sostenible en Colombia",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://patinetaelectrica.com.co",
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}`,
     "logo": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/logo.png`,
     "contactPoint": {
       "@type": "ContactPoint",

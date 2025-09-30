@@ -4,7 +4,7 @@
 import Image from 'next/image'
 import { NegocioDirectorio } from '@/types'
 import { formatWhatsAppUrl, getCategoryIcon } from '@/lib/utils'
-import { getCitySlug, generateBusinessSlug } from '@/lib/slugs'
+import { getCitySlug, generateBusinessSlug, getCategorySlug } from '@/lib/slugs'
 import { markdownToPlainText } from '@/lib/markdown'
 
 interface BusinessCardProps {
@@ -16,10 +16,11 @@ export default function BusinessCard({ business, featured = false }: BusinessCar
   const categoryIcon = getCategoryIcon(business.categoria)
   const whatsappUrl = business.whatsapp ? formatWhatsAppUrl(business.whatsapp, `Hola, me interesa conocer más sobre ${business.nombre}`) : null
 
-  // Generate SEO-friendly URL
+  // Generate SEO-friendly URL with new structure: /[categoria]/[cidade]/[negocio]
+  const categorySlug = getCategorySlug(business.categoria)
   const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
   const businessSlug = business.slug || generateBusinessSlug(business.nombre)
-  const businessUrl = `/negocio/${citySlug}/${businessSlug}`
+  const businessUrl = `/${categorySlug}/${citySlug}/${businessSlug}`
 
   return (
     <div
