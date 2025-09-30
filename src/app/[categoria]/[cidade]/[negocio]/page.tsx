@@ -78,19 +78,18 @@ export default async function NegocioSlugPage({ params }: PageProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
   const businessUrl = `${baseUrl}/${categoria}/${cidade}/${negocio}`
 
-  // Breadcrumb items
+  // Breadcrumb items - Updated to new URL structure
   const breadcrumbItems = [
-    { label: 'Directorio', href: '/directorio' },
+    { label: 'Inicio', href: '/' },
     { label: business.categoria, href: `/${categoria}` },
-    { label: business.ciudad, href: `/ciudades/${cidade}` },
+    { label: business.ciudad, href: `/${categoria}/${cidade}` },
     { label: business.nombre }
   ]
 
   const breadcrumbStructuredData = [
     { name: 'Inicio', url: baseUrl },
-    { name: 'Directorio', url: `${baseUrl}/directorio` },
     { name: business.categoria, url: `${baseUrl}/${categoria}` },
-    { name: business.ciudad, url: `${baseUrl}/ciudades/${cidade}` },
+    { name: business.ciudad, url: `${baseUrl}/${categoria}/${cidade}` },
     { name: business.nombre, url: businessUrl }
   ]
 
@@ -289,7 +288,7 @@ export default async function NegocioSlugPage({ params }: PageProps) {
 
                 {/* Category-specific button */}
                 <Link
-                  href={`/categorias/${business.categoria.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`/${categoria}`}
                   className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-100 to-green-200 text-green-700 rounded-lg hover:from-green-200 hover:to-green-300 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   <span className="text-2xl mr-2">{categoryIcon}</span>

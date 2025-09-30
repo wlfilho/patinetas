@@ -3,17 +3,17 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { categoryService, negociosService } from '@/lib/supabase'
 import { getCategorySlug } from '@/lib/slugs'
-import DirectorioCategoryClient from './DirectorioCategoryClient'
+import CategoryPageClient from './CategoryPageClient'
 
 interface CategoryPageProps {
-  params: Promise<{ 'slug-da-categoria': string }>
+  params: Promise<{ categoria: string }>
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { 'slug-da-categoria': categorySlug } = await params
+  const { categoria } = await params
   
   try {
-    const category = await categoryService.getBySlug(categorySlug)
+    const category = await categoryService.getBySlug(categoria)
     
     if (!category) {
       return {
@@ -22,17 +22,17 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       }
     }
 
-    const businessCount = await categoryService.getBusinessCount(category.id)
-    
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'
+
     return {
       title: `${category.nombre} en Colombia | Patinetas Eléctricas`,
-      description: category.descripcion || `Encuentra los mejores negocios de ${category.nombre.toLowerCase()} en Colombia. Directorio completo de patinetas eléctricas con ${businessCount} opciones disponibles.`,
-      keywords: `${category.nombre}, patinetas eléctricas, Colombia, ${category.nombre.toLowerCase()}, directorio, negocios`,
+      description: category.descripcion || `Encuentra los mejores negocios de ${category.nombre.toLowerCase()} en Colombia. Directorio completo con información verificada.`,
+      keywords: `${category.nombre.toLowerCase()}, patinetas eléctricas, Colombia, directorio`,
       openGraph: {
         title: `${category.nombre} en Colombia`,
         description: category.descripcion || `Directorio de ${category.nombre.toLowerCase()} en Colombia`,
+        url: `${baseUrl}/${categoria}`,
         type: 'website',
-        locale: 'es_CO',
       },
       twitter: {
         card: 'summary_large_image',
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
         description: category.descripcion || `Directorio de ${category.nombre.toLowerCase()} en Colombia`,
       },
       alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://patinetaelectrica.com.co'}/${categorySlug}`
+        canonical: `${baseUrl}/${categoria}`
       }
     }
   } catch (error) {
@@ -53,24 +53,14 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { 'slug-da-categoria': categorySlug } = await params
-  
+  const { categoria } = await params
+
   try {
-    // Try to get category by slug first
-    let category = await categoryService.getBySlug(categorySlug)
+    // Validate that the category exists
+    const category = await categoryService.getBySlug(categoria)
     
-    // If not found by slug, try to find by generated slug from name
     if (!category) {
-      const allCategories = await categoryService.getAll(false) // Only active categories
-      const foundCategory = allCategories.find(cat =>
-        getCategorySlug(cat.nombre) === categorySlug
-      )
-
-      if (!foundCategory) {
-        notFound()
-      }
-
-      category = foundCategory
+      notFound()
     }
 
     // Get businesses for this category
@@ -83,10 +73,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         }>
-          <DirectorioCategoryClient 
+          <CategoryPageClient 
             category={category}
             initialBusinesses={businesses}
-            categorySlug={categorySlug}
+            categorySlug={categoria}
           />
         </Suspense>
       </div>
@@ -105,10 +95,11 @@ export async function generateStaticParams() {
     return categories
       .filter(category => category.slug) // Only categories with slugs
       .map((category) => ({
-        'slug-da-categoria': category.slug,
+        categoria: category.slug,
       }))
   } catch (error) {
     console.error('Error generating static params for categories:', error)
     return []
   }
 }
+

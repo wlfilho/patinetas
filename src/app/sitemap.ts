@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { negociosService } from '@/lib/supabase'
+import { negociosService, categoryService } from '@/lib/supabase'
 import { generateSlug } from '@/lib/utils'
 import { getCategorySlug, getCitySlug } from '@/lib/slugs'
 
@@ -48,8 +48,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    // Dynamic business pages - NEW URL STRUCTURE: /[categoria]/[cidade]/[negocio]
+    // Get all data
     const businesses = await negociosService.getAll()
+    const allCategories = await categoryService.getAll(false) // Only active categories
+
+    // 1. Category pages - NEW CANONICAL URL: /:categoria (Priority: 0.8)
+    const categoryPages = allCategories
+      .filter(category => category.slug)
+      .map(category => ({
+        url: `${baseUrl}/${category.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }))
+
+    // 2. Category + City pages - NEW URL: /:categoria/:ciudad (Priority: 0.7)
+    // Generate unique category-city combinations from businesses
+    const categoryCityCombinations = new Map<string, { categorySlug: string; citySlug: string; cityName: string }>()
+
+    businesses.forEach(business => {
+      const categorySlug = getCategorySlug(business.categoria)
+      const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
+      const key = `${categorySlug}/${citySlug}`
+
+      if (!categoryCityCombinations.has(key)) {
+        categoryCityCombinations.set(key, {
+          categorySlug,
+          citySlug,
+          cityName: business.ciudad
+        })
+      }
+    })
+
+    const categoryCityPages = Array.from(categoryCityCombinations.values()).map(combo => ({
+      url: `${baseUrl}/${combo.categorySlug}/${combo.citySlug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
+
+    // 3. Business detail pages - URL: /:categoria/:cidade/:negocio (Priority: 0.6)
     const businessPages = businesses.map(business => {
       const categorySlug = getCategorySlug(business.categoria)
       const citySlug = business.ciudad_slug || getCitySlug(business.ciudad)
@@ -63,29 +101,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     })
 
-    // Category pages
-    const categories = await negociosService.getCategories()
-    const categoryPages = categories.map(category => ({
-      url: `${baseUrl}/categorias/${generateSlug(category.nombre)}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }))
-
-    // City pages
-    const cities = await negociosService.getCities()
-    const cityPages = cities.map(city => ({
-      url: `${baseUrl}/ciudades/${generateSlug(city)}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }))
-
     return [
       ...staticPages,
-      ...businessPages,
       ...categoryPages,
-      ...cityPages,
+      ...categoryCityPages,
+      ...businessPages,
     ]
   } catch (error) {
     console.error('Error generating sitemap:', error)

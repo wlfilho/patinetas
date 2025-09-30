@@ -3,10 +3,10 @@ import Link from 'next/link'
 const footerNavigation = {
   directorio: [
     { name: 'Todas las Categorías', href: '/categorias' },
-    { name: 'Venta de Patinetas', href: '/categorias/venta-patinetas-electricas' },
-    { name: 'Reparación', href: '/categorias/reparacion-mantenimiento' },
-    { name: 'Repuestos', href: '/categorias/repuestos-accesorios' },
-    { name: 'Alquiler', href: '/categorias/alquiler-patinetas' },
+    { name: 'Venta de Patinetas', href: '/venta-patinetas-electricas' },
+    { name: 'Reparación', href: '/reparacion-mantenimiento' },
+    { name: 'Repuestos', href: '/repuestos-accesorios' },
+    { name: 'Alquiler', href: '/alquiler-patinetas' },
   ],
   ciudades: [
     { name: 'Bogotá', href: '/ciudades/bogota' },

@@ -21,8 +21,8 @@ export default function CategoryCard({
   const displayIcon = icon || getCategoryIcon(name)
 
   return (
-    <Link 
-      href={`/categorias/${slug}`}
+    <Link
+      href={`/${slug}`}
       className={`
         group block p-6 bg-white rounded-xl border border-gray-200 
         hover:border-primary hover:shadow-lg transition-all duration-300

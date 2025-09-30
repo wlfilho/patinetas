@@ -4,6 +4,38 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // ============================================
+  // CATEGORY URL REDIRECTS (SEO Optimization)
+  // ============================================
+  // Redirect /categorias/:slug to /:slug (301 Permanent Redirect)
+  // This makes category URLs shorter and more SEO-friendly
+  if (pathname.startsWith('/categorias/') && pathname !== '/categorias') {
+    const categorySlug = pathname.replace('/categorias/', '')
+
+    // Validate slug format
+    if (categorySlug && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(categorySlug)) {
+      console.log(`[MIDDLEWARE] Redirecting /categorias/${categorySlug} to /${categorySlug}`)
+      const newUrl = new URL(`/${categorySlug}`, request.url)
+      return NextResponse.redirect(newUrl, { status: 301 })
+    }
+  }
+
+  // Redirect /directorio/:slug to /:slug (301 Permanent Redirect)
+  // Legacy URL structure support
+  if (pathname.startsWith('/directorio/') && pathname !== '/directorio' && !pathname.startsWith('/directorio/p/')) {
+    const categorySlug = pathname.replace('/directorio/', '')
+
+    // Validate slug format
+    if (categorySlug && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(categorySlug)) {
+      console.log(`[MIDDLEWARE] Redirecting /directorio/${categorySlug} to /${categorySlug}`)
+      const newUrl = new URL(`/${categorySlug}`, request.url)
+      return NextResponse.redirect(newUrl, { status: 301 })
+    }
+  }
+
+  // ============================================
+  // CATALOG ROUTES
+  // ============================================
   // Handle model catalog routes (brand/model structure)
   if (pathname.match(/^\/catalogo\/marcas\/[a-z0-9-]+\/[a-z0-9-]+$/)) {
     const pathParts = pathname.split('/')
@@ -74,6 +106,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/categorias/:path*',
+    '/directorio/:path*',
     '/catalogo/marcas/:path*',
     '/api/brands/:path*',
     '/api/models/:path*'
