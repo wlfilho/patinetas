@@ -78,11 +78,14 @@ export default function BusinessesPage() {
     }
 
     try {
-      await adminService.deleteBusiness(id)
+      console.log('Attempting to delete business with ID:', id)
+      const result = await adminService.deleteBusiness(id)
+      console.log('Delete result:', result)
       await loadBusinesses()
+      alert('Negocio desactivado exitosamente')
     } catch (err) {
-      alert('Error al desactivar el negocio')
-      console.error('Error:', err)
+      console.error('Error deleting business:', err)
+      alert(`Error al desactivar el negocio: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     }
   }
 
