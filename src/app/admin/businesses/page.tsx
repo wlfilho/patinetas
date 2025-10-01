@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminService } from '@/lib/supabase'
@@ -9,6 +10,7 @@ import ToggleSwitch from '@/components/ui/ToggleSwitch'
 import { getCategorySlug, getCitySlug, generateBusinessSlug } from '@/lib/slugs'
 
 export default function BusinessesPage() {
+  const router = useRouter()
   const [businesses, setBusinesses] = useState<NegocioDirectorio[]>([])
   const [filteredBusinesses, setFilteredBusinesses] = useState<NegocioDirectorio[]>([])
   const [loading, setLoading] = useState(true)
@@ -115,6 +117,24 @@ export default function BusinessesPage() {
     } catch (err) {
       alert(`Error al ${currentStatus ? 'desactivar' : 'reactivar'} el negocio`)
       console.error('Error:', err)
+    }
+  }
+
+  const handleDuplicate = async (id: number) => {
+    if (!confirm('¿Duplicar este negocio? Se creará una copia que podrás editar.')) {
+      return
+    }
+
+    try {
+      console.log('Attempting to duplicate business with ID:', id)
+      const newBusiness = await adminService.duplicateBusiness(id)
+      console.log('Duplicate created:', newBusiness)
+      alert('Negocio duplicado exitosamente. Redirigiendo a la página de edición...')
+      // Redirect to edit page of the newly created business
+      router.push(`/admin/businesses/${newBusiness.id}`)
+    } catch (err) {
+      console.error('Error duplicating business:', err)
+      alert(`Error al duplicar el negocio: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     }
   }
 
@@ -337,6 +357,18 @@ export default function BusinessesPage() {
                             </svg>
                           </Link>
                         )}
+
+                        {/* Duplicate Icon */}
+                        <button
+                          onClick={() => handleDuplicate(business.id)}
+                          className="text-gray-600 hover:text-gray-900 transition-colors p-1 rounded-md hover:bg-gray-100"
+                          title="Duplicar negocio"
+                          aria-label="Duplicar negocio"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
 
                         {/* Delete Icon */}
                         <button
