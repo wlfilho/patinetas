@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { NegocioDirectorio } from '@/types'
 import BusinessCard from '@/components/ui/BusinessCard'
 import CityCard from '@/components/ui/CityCard'
-import DepartmentMapNavigation from '@/components/ui/DepartmentMapNavigation'
+import LazyDepartmentMapNavigation from '@/components/ui/LazyDepartmentMapNavigation'
 import { getCitySlug } from '@/lib/slugs'
 
 interface DepartmentPageClientProps {
@@ -127,11 +127,12 @@ export default function DepartmentPageClient({
           </div>
         )}
 
-        {/* Map and Quick Navigation */}
-        <DepartmentMapNavigation
+        {/* Map and Quick Navigation - Lazy Loaded */}
+        <LazyDepartmentMapNavigation
           businesses={businesses}
           businessesByCity={businessesByCity}
           departmentName={departmentName}
+          departmentSlug={getCitySlug(departmentName)}
         />
 
         {/* All Businesses Title */}

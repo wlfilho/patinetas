@@ -11,7 +11,7 @@ import MarkdownContent from '@/components/ui/MarkdownContent'
 import GoogleBusinessRating from '@/components/ui/GoogleBusinessRating'
 import SocialShareButtons from '@/components/ui/SocialShareButtons'
 import NavigationButtons from '@/components/ui/NavigationButtons'
-import BusinessMap from '@/components/ui/BusinessMap'
+import LazyBusinessMap from '@/components/ui/LazyBusinessMap'
 import BusinessHoursGrid from '@/components/ui/BusinessHoursGrid'
 import BusinessStatus from '@/components/ui/BusinessStatus'
 import ContactButtons from '@/components/ui/ContactButtons'
@@ -454,9 +454,9 @@ export default async function NegocioSlugPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                {/* Interactive Map */}
+                {/* Interactive Map - Lazy Loaded */}
                 <div className="mb-4">
-                  <BusinessMap
+                  <LazyBusinessMap
                     address={business.direccion}
                     businessName={business.nombre}
                     city={business.ciudad}
