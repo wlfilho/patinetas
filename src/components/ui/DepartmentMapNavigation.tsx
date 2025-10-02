@@ -395,24 +395,28 @@ export default function DepartmentMapNavigation({
                 {/* Business markers */}
                 {filteredBusinessesWithCoords
                   .filter(business => business.coordinates)
-                  .map((business) => (
-                    <Marker
-                      key={business.id}
-                      position={business.coordinates!}
-                      icon={createNumberedIcon(business.index, selectedBusiness === business.id)}
-                      ref={(marker) => {
-                        if (marker) {
-                          markersRef.current[business.id] = marker
-                        }
-                      }}
-                      eventHandlers={{
-                        click: () => handleMarkerClick(business)
-                      }}
-                    >
-                      <Popup>
-                        <div className="p-2">
-                          <h4 className="font-bold text-gray-900 mb-1">
-                            {business.index}. {business.nombre}
+                  .map((business) => {
+                    const icon = createNumberedIcon(business.index, selectedBusiness === business.id)
+                    if (!icon) return null
+
+                    return (
+                      <Marker
+                        key={business.id}
+                        position={business.coordinates!}
+                        icon={icon}
+                        ref={(marker) => {
+                          if (marker) {
+                            markersRef.current[business.id] = marker
+                          }
+                        }}
+                        eventHandlers={{
+                          click: () => handleMarkerClick(business)
+                        }}
+                      >
+                        <Popup>
+                          <div className="p-2">
+                            <h4 className="font-bold text-gray-900 mb-1">
+                              {business.index}. {business.nombre}
                           </h4>
                           {business.direccion && (
                             <p className="text-sm text-gray-600 mb-1">
@@ -427,7 +431,8 @@ export default function DepartmentMapNavigation({
                         </div>
                       </Popup>
                     </Marker>
-                  ))}
+                    )
+                  })}
               </MapContainer>
 
               {/* Geocoding progress indicator */}
