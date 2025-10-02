@@ -518,7 +518,7 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-1">Coordenadas GPS</h3>
                 <p className="text-xs text-gray-500">
-                  Opcional. Para encontrar coordenadas: Haga clic derecho en Google Maps → "¿Qué hay aquí?" → Copie las coordenadas
+                  Opcional. Para encontrar coordenadas: Haga clic derecho en Google Maps → &quot;¿Qué hay aquí?&quot; → Copie las coordenadas
                 </p>
               </div>
 

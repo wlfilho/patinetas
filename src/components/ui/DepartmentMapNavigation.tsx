@@ -5,10 +5,12 @@ import dynamic from 'next/dynamic'
 import { NegocioDirectorio } from '@/types'
 import { getCitySlug } from '@/lib/slugs'
 import '@/styles/map-markers.css'
+import type * as LeafletTypes from 'leaflet'
 
 // Import Leaflet only on client side
-let L: any
+let L: typeof LeafletTypes | undefined
 if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   L = require('leaflet')
 }
 

@@ -280,7 +280,7 @@ export default async function DepartamentosPage() {
                   </div>
                   <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                      Departamentos que comienzan con '{letter}'
+                      Departamentos que comienzan con &apos;{letter}&apos;
                     </h2>
                     <p className="text-sm sm:text-base text-gray-600">
                       {groupedDepartments[letter].length} {groupedDepartments[letter].length === 1 ? 'departamento' : 'departamentos'}
