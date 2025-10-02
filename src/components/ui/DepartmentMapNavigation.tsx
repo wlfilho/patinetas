@@ -31,10 +31,10 @@ const Popup = dynamic(
   () => import('react-leaflet').then((mod) => mod.Popup),
   { ssr: false }
 )
-const useMapEvents = dynamic(
-  () => import('react-leaflet').then((mod) => mod.useMapEvents),
-  { ssr: false }
-)
+
+// Import useMapEvents directly (it's a hook, not a component)
+// It will only be used inside components that are already client-side only
+import { useMapEvents } from 'react-leaflet'
 
 interface DepartmentMapNavigationProps {
   businesses: NegocioDirectorio[]
