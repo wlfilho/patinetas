@@ -10,6 +10,12 @@
     "audit:indexation": "tsx scripts/audit-business-indexation.ts",
     "generate-slugs": "tsx scripts/generate-business-slugs.js"
   },
+  "browserslist": [
+    "chrome >= 90",
+    "firefox >= 88",
+    "safari >= 14",
+    "edge >= 90"
+  ],
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.57.4",
