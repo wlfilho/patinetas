@@ -94,7 +94,7 @@ function MapSetup({
   onMapReady
 }: {
   businesses: BusinessWithCoordinates[]
-  onMapReady: (map: L.Map) => void
+  onMapReady: (map: LeafletTypes.Map) => void
 }) {
   const map = useMapEvents({})
 
@@ -115,6 +115,12 @@ function MapSetup({
       // Verify map has fitBounds method before calling
       if (!map || typeof map.fitBounds !== 'function') {
         console.warn('Map not ready or fitBounds not available')
+        return
+      }
+
+      // Verify L is available
+      if (!L || typeof L.latLngBounds !== 'function') {
+        console.warn('Leaflet not loaded')
         return
       }
 
@@ -164,7 +170,12 @@ async function geocodeAddress(address: string, city: string, department: string)
 }
 
 // Create numbered marker icon (circular badge)
-function createNumberedIcon(number: number, isActive: boolean = false): L.DivIcon {
+function createNumberedIcon(number: number, isActive: boolean = false): LeafletTypes.DivIcon | null {
+  if (!L || typeof L.divIcon !== 'function') {
+    console.warn('Leaflet not loaded')
+    return null
+  }
+
   return L.divIcon({
     className: 'custom-numbered-marker',
     html: `
@@ -189,8 +200,8 @@ export default function DepartmentMapNavigation({
   const [businessesWithCoords, setBusinessesWithCoords] = useState<BusinessWithCoordinates[]>([])
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodingProgress, setGeocodingProgress] = useState({ current: 0, total: 0 })
-  const mapRef = useRef<L.Map | null>(null)
-  const markersRef = useRef<{ [key: number]: L.Marker }>({})
+  const mapRef = useRef<LeafletTypes.Map | null>(null)
+  const markersRef = useRef<{ [key: number]: LeafletTypes.Marker }>({})
 
   useEffect(() => {
     setIsClient(true)
