@@ -289,6 +289,74 @@ const CATEGORY_SLUG_MAPPINGS: Record<string, string> = {
 }
 
 /**
+ * Generate a department slug from department name
+ * @param departmentName - The department name
+ * @returns A URL-friendly department slug
+ */
+export function generateDepartmentSlug(departmentName: string): string {
+  return generateSlug(departmentName)
+}
+
+/**
+ * Predefined department slug mappings for consistency
+ * Maps department names to their preferred slugs
+ */
+const DEPARTMENT_SLUG_MAPPINGS: Record<string, string> = {
+  'bogotá d.c.': 'bogota',
+  'bogotá': 'bogota',
+  'cundinamarca': 'cundinamarca',
+  'antioquia': 'antioquia',
+  'valle del cauca': 'valle-del-cauca',
+  'atlántico': 'atlantico',
+  'bolívar': 'bolivar',
+  'santander': 'santander',
+  'norte de santander': 'norte-de-santander',
+  'tolima': 'tolima',
+  'huila': 'huila',
+  'meta': 'meta',
+  'caldas': 'caldas',
+  'risaralda': 'risaralda',
+  'quindío': 'quindio',
+  'nariño': 'narino',
+  'cauca': 'cauca',
+  'magdalena': 'magdalena',
+  'cesar': 'cesar',
+  'córdoba': 'cordoba',
+  'sucre': 'sucre',
+  'la guajira': 'la-guajira',
+  'boyacá': 'boyaca',
+  'casanare': 'casanare',
+  'arauca': 'arauca',
+  'caquetá': 'caqueta',
+  'putumayo': 'putumayo',
+  'amazonas': 'amazonas',
+  'guainía': 'guainia',
+  'guaviare': 'guaviare',
+  'vaupés': 'vaupes',
+  'vichada': 'vichada',
+  'chocó': 'choco',
+  'san andrés y providencia': 'san-andres-y-providencia'
+}
+
+/**
+ * Get the preferred slug for a department name
+ * Uses predefined mappings for consistency, falls back to generated slug
+ * @param departmentName - The department name
+ * @returns The preferred slug for the department
+ */
+export function getDepartmentSlug(departmentName: string): string {
+  const normalizedName = departmentName.toLowerCase().trim()
+
+  // Check if we have a predefined mapping
+  if (DEPARTMENT_SLUG_MAPPINGS[normalizedName]) {
+    return DEPARTMENT_SLUG_MAPPINGS[normalizedName]
+  }
+
+  // Fall back to generated slug
+  return generateDepartmentSlug(departmentName)
+}
+
+/**
  * Get the preferred slug for a category name
  * Uses predefined mappings for consistency, falls back to generated slug
  * @param categoryName - The category name

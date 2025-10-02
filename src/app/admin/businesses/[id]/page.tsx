@@ -50,7 +50,9 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
     servicios: [] as string[],
     outras_especialidades: [] as string[],
     imagen_url: '',
-    activo: true
+    activo: true,
+    latitude: '',
+    longitude: ''
   })
 
   const [servicioInput, setServicioInput] = useState('')
@@ -130,7 +132,9 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
         servicios: foundBusiness.servicios || [],
         outras_especialidades: foundBusiness.outras_especialidades || [],
         imagen_url: foundBusiness.imagen_url || '',
-        activo: foundBusiness.activo
+        activo: foundBusiness.activo,
+        latitude: foundBusiness.gps_coordinates?.latitude?.toString() || '',
+        longitude: foundBusiness.gps_coordinates?.longitude?.toString() || ''
       })
     } catch (err) {
       setError('Error loading business')
@@ -220,7 +224,37 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
     try {
       setSaving(true)
       setError(null)
-      
+
+      // Prepare GPS coordinates
+      let gps_coordinates = undefined
+      if (formData.latitude && formData.longitude) {
+        const lat = parseFloat(formData.latitude)
+        const lon = parseFloat(formData.longitude)
+
+        // Validate coordinates
+        if (isNaN(lat) || isNaN(lon)) {
+          setError('Las coordenadas GPS deben ser números válidos')
+          setSaving(false)
+          return
+        }
+        if (lat < -90 || lat > 90) {
+          setError('La latitud debe estar entre -90 y 90')
+          setSaving(false)
+          return
+        }
+        if (lon < -180 || lon > 180) {
+          setError('La longitud debe estar entre -180 y 180')
+          setSaving(false)
+          return
+        }
+
+        gps_coordinates = { latitude: lat, longitude: lon }
+      } else if (formData.latitude || formData.longitude) {
+        setError('Debe ingresar ambas coordenadas (latitud y longitud) o dejar ambas vacías')
+        setSaving(false)
+        return
+      }
+
       const updates = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || undefined,
@@ -244,7 +278,8 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
         servicios: formData.servicios,
         outras_especialidades: formData.outras_especialidades,
         imagen_url: formData.imagen_url.trim() || undefined,
-        activo: formData.activo
+        activo: formData.activo,
+        gps_coordinates
       }
 
       await adminService.updateBusiness(business.id, updates)
@@ -476,6 +511,64 @@ export default function EditBusinessPage({ params }: EditBusinessPageProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                 placeholder="Calle, carrera, número..."
               />
+            </div>
+
+            {/* GPS Coordinates */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">Coordenadas GPS</h3>
+                <p className="text-xs text-gray-500">
+                  Opcional. Para encontrar coordenadas: Haga clic derecho en Google Maps → &quot;¿Qué hay aquí?&quot; → Copie las coordenadas
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-1">
+                    Latitud
+                  </label>
+                  <input
+                    type="number"
+                    id="latitude"
+                    name="latitude"
+                    value={formData.latitude}
+                    onChange={handleInputChange}
+                    step="any"
+                    min="-90"
+                    max="90"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    placeholder="6.1821852"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Debe estar entre -90 y 90</p>
+                </div>
+
+                <div>
+                  <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitud
+                  </label>
+                  <input
+                    type="number"
+                    id="longitude"
+                    name="longitude"
+                    value={formData.longitude}
+                    onChange={handleInputChange}
+                    step="any"
+                    min="-180"
+                    max="180"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                    placeholder="-75.5799012"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Debe estar entre -180 y 180</p>
+                </div>
+              </div>
+
+              {formData.latitude && formData.longitude && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm text-green-800">
+                    ✓ Coordenadas: {formData.latitude}, {formData.longitude}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

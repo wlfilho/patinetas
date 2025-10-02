@@ -45,6 +45,10 @@ export interface NegocioDirectorio {
   category_id?: string
   slug?: string
   ciudad_slug?: string
+  gps_coordinates?: {
+    latitude: number
+    longitude: number
+  }
 }
 
 // Database types for categorias_patinetas table
@@ -554,6 +558,58 @@ export const negociosService = {
       console.warn('Supabase error, using mock data:', error)
       const cities = [...new Set(mockBusinesses.map(b => b.ciudad))]
       return cities.sort()
+    }
+  },
+
+  // Get unique departments with business count
+  async getDepartments() {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('departamento')
+        .eq('activo', true)
+
+      if (error) throw error
+
+      // Count businesses per department
+      const departmentCounts = data.reduce((acc, item) => {
+        const dept = item.departamento
+        acc[dept] = (acc[dept] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+
+      // Convert to array and sort alphabetically
+      return Object.entries(departmentCounts)
+        .map(([departamento, count]) => ({ departamento, count }))
+        .sort((a, b) => a.departamento.localeCompare(b.departamento, 'es'))
+    } catch (error) {
+      console.warn('Supabase error, using mock data:', error)
+      const departmentCounts = mockBusinesses.reduce((acc, b) => {
+        acc[b.departamento] = (acc[b.departamento] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+
+      return Object.entries(departmentCounts)
+        .map(([departamento, count]) => ({ departamento, count }))
+        .sort((a, b) => a.departamento.localeCompare(b.departamento, 'es'))
+    }
+  },
+
+  // Get businesses by department
+  async getByDepartment(departamento: string) {
+    try {
+      const { data, error } = await supabase
+        .from('diretorio_patinetas')
+        .select('*')
+        .eq('departamento', departamento)
+        .eq('activo', true)
+        .order('nombre')
+
+      if (error) throw error
+      return data as NegocioDirectorio[]
+    } catch (error) {
+      console.warn('Supabase error, using mock data:', error)
+      return mockBusinesses.filter(b => b.departamento === departamento)
     }
   },
 

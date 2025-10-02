@@ -61,9 +61,10 @@ export default function BusinessCard({ business, featured = false, location = 'u
 
   return (
     <div
+      id={`business-${business.id}`}
       className={`
         block bg-white rounded-xl border overflow-hidden
-        hover:shadow-lg hover:border-primary/30 transition-all duration-300
+        hover:shadow-lg hover:border-primary/30 transition-all duration-300 scroll-mt-20
         ${featured ? 'border-gray-300 shadow-sm' : 'border-gray-200'}
       `}
     >
